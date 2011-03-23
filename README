@@ -1,0 +1,3 @@
+Graphbase is an implementation of the Tinkerpop Blueprints APIs on top of HBase. For the moment it's an experiment to see how the bigtable model is suitable for storing a graph. 
+I'm thinking to implement some M/R algorithm on top of this infrastructure and I'm thinking to add a Scala based DSL.
+More to come soon ...
