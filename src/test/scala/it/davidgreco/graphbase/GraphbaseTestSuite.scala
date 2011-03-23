@@ -9,13 +9,14 @@ import com.tinkerpop.blueprints.pgm.Graph
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.hadoop.hbase.util.Bytes
 import scala.collection.JavaConversions._
+import com.eaio.uuid.UUID
 
 @RunWith(classOf[JUnitRunner])
 class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHbase {
 
   describe("A graph") {
 
-    it("should create and retrieve verteces") {
+    it("should create and retrieve vertexes") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", "21818")

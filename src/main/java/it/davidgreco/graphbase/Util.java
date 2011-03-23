@@ -2,7 +2,7 @@ package it.davidgreco.graphbase;
 
 import org.apache.hadoop.hbase.util.Bytes;
 
-import java.util.UUID;
+import com.eaio.uuid.UUID;
 
 public class Util {
 
@@ -16,8 +16,8 @@ public class Util {
     final static byte non_supported_type = 100;
 
     static byte[] generateVertexId() {
-        UUID rid = UUID.randomUUID();
-        return Bytes.add(Bytes.toBytes(rid.getMostSignificantBits()), Bytes.toBytes(rid.getLeastSignificantBits()));
+        UUID rid = new UUID();
+        return Bytes.add(Bytes.toBytes(rid.getTime()), Bytes.toBytes(rid.getClockSeqAndNode()));
     }
 
     static byte[] generateEdgeId(byte[] vertexId, long localId) {
