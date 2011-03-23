@@ -1,6 +1,0 @@
-#External Dependencies
-#Wed Mar 23 22:14:40 CET 2011
-/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar=graphbase.scala
-/Users/dgreco/Dropbox/Workspace/graphbase/project/boot/scala-2.7.7/lib/scala-library.jar=graphbase.scala
-/Users/dgreco/Dropbox/Workspace/graphbase/project/boot/scala-2.7.7/org.scala-tools.sbt/sbt/0.7.4/sbt_2.7.7-0.7.4.jar=graphbase.scala
-/Users/dgreco/Dropbox/Workspace/graphbase/project/boot/scala-2.7.7/org.scala-tools.sbt/sbt/0.7.4/ivy_2.7.7-0.7.4.jar=graphbase.scala
