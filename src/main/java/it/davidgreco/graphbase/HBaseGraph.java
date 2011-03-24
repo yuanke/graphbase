@@ -57,7 +57,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public Iterable<Vertex> getVertices() {
-        return null;
+        throw new RuntimeException("Not supported");
     }
 
     @Override
@@ -137,7 +137,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public Iterable<Edge> getEdges() {
-        return null;
+        throw new RuntimeException("Not supported");
     }
 
     @Override
