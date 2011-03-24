@@ -1,6 +1,7 @@
 package it.davidgreco.graphbase;
 
 import com.tinkerpop.blueprints.pgm.Edge;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -83,6 +84,8 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             Get get = new Get(id);
             Result result = handle.vtable.get(get);
             byte[] bvalue = result.getValue(Bytes.toBytes(handle.vnameProperties), Bytes.toBytes(key));
+            if(bvalue == null)
+                return null;
             return Util.bytesToTypedObject(bvalue);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -119,8 +122,20 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
     }
 
     @Override
-    public Object removeProperty(String s) {
-        return null;
+    public Object removeProperty(String key) {
+        try {
+            Get get = new Get(id);
+            Result result = handle.vtable.get(get);
+            byte[] bvalue = result.getValue(Bytes.toBytes(handle.vnameProperties), Bytes.toBytes(key));
+            if(bvalue == null)
+                return null;
+            Delete delete = new Delete(get.getRow());
+            delete.deleteColumns(Bytes.toBytes(handle.vnameProperties), Bytes.toBytes(key));
+            handle.vtable.delete(delete);
+            return Util.bytesToTypedObject(bvalue);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

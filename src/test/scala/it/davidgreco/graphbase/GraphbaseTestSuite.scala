@@ -9,7 +9,6 @@ import com.tinkerpop.blueprints.pgm.Graph
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.hadoop.hbase.util.Bytes
 import scala.collection.JavaConversions._
-import com.eaio.uuid.UUID
 
 @RunWith(classOf[JUnitRunner])
 class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHbase {
@@ -54,6 +53,19 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
       assert(v1.getProperty("A_DOUBLE") == 3.1415926535D)
       assert(v1.getProperty("A_BOOLEAN") == true)
 
+    }
+
+    it("should remove vertex properties") {
+      var conf = HBaseConfiguration.create
+      conf.set("hbase.zookeeper.quorum", "localhost")
+      conf.set("hbase.zookeeper.property.clientPort", "21818")
+      val admin = new HBaseAdmin(conf)
+      val graph: Graph = new HBaseGraph(admin, "simple")
+      val v1 = graph.addVertex()
+
+      v1.setProperty("A_STRING", "DAVID")
+      assert(v1.removeProperty("A_STRING") == "DAVID")
+      assert(v1.getProperty("A_STRING") == null)
     }
 
     it("should complain on non supported property type") {
@@ -152,9 +164,9 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
 
-      val v1 = graph.addVertex()
-      val v2 = graph.addVertex()
-      val v3 = graph.addVertex()
+      val v1 = graph.addVertex(null)
+      val v2 = graph.addVertex(null)
+      val v3 = graph.addVertex(null)
       val e1 = graph.addEdge(null, v1, v2, "e1")
       val e2 = graph.addEdge(null, v1, v3, "e2")
 
@@ -191,6 +203,21 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
       assert(e2.getProperty("A_BOOLEAN") == true)
 
       assert(e2.getPropertyKeys.toSet == Set("A_STRING", "A_LONG", "AN_INT", "A_SHORT", "A_FLOAT", "A_DOUBLE", "A_BOOLEAN"))
+    }
+
+    it("should remove edge properties") {
+      var conf = HBaseConfiguration.create
+      conf.set("hbase.zookeeper.quorum", "localhost")
+      conf.set("hbase.zookeeper.property.clientPort", "21818")
+      val admin = new HBaseAdmin(conf)
+      val graph: Graph = new HBaseGraph(admin, "simple")
+      val v1 = graph.addVertex(null)
+      val v2 = graph.addVertex(null)
+      val e1 = graph.addEdge(null, v1, v2, "LABEL")
+
+      e1.setProperty("A_STRING", "DAVID")
+      assert(e1.removeProperty("A_STRING") == "DAVID")
+      assert(e1.getProperty("A_STRING") == null)
     }
   }
 

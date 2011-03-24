@@ -1,6 +1,7 @@
 package it.davidgreco.graphbase;
 
 import com.tinkerpop.blueprints.pgm.Vertex;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -44,6 +45,8 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
             Get get = new Get(struct.vertexId);
             Result result = handle.vtable.get(get);
             byte[] bvalue = result.getValue(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId));
+            if(bvalue == null)
+                return null;
             return Util.bytesToTypedObject(bvalue);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -59,11 +62,11 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
             NavigableMap<byte[], byte[]> familyMap = result.getFamilyMap(Bytes.toBytes(handle.vnameEdgeProperties));
             Set<String> keys = new TreeSet<String>();
             Set<byte[]> bkeys = familyMap.keySet();
-            for(byte[] bkey: bkeys) {
+            for (byte[] bkey : bkeys) {
                 byte[] id = Bytes.tail(bkey, 8);
-                if(Bytes.equals(id, struct.edgeLocalId)) {
-                    String key = Bytes.toString(Bytes.head(bkey, bkey.length-8));
-                    if(!key.equals("label"))
+                if (Bytes.equals(id, struct.edgeLocalId)) {
+                    String key = Bytes.toString(Bytes.head(bkey, bkey.length - 8));
+                    if (!key.equals("label"))
                         keys.add(key);
                 }
             }
@@ -87,8 +90,21 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
     }
 
     @Override
-    public Object removeProperty(String s) {
-        return null;
+    public Object removeProperty(String key) {
+        try {
+            Util.EdgeIdStruct struct = Util.getEdgeIdStruct(id);
+            Get get = new Get(struct.vertexId);
+            Result result = handle.vtable.get(get);
+            byte[] bvalue = result.getValue(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId));
+            if (bvalue == null)
+                return null;
+            Delete delete = new Delete(get.getRow());
+            delete.deleteColumns(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId));
+            handle.vtable.delete(delete);
+            return Util.bytesToTypedObject(bvalue);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
