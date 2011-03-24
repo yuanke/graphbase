@@ -1,10 +1,7 @@
 package it.davidgreco.graphbase;
 
 import com.tinkerpop.blueprints.pgm.*;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
@@ -53,6 +50,12 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public void removeVertex(Vertex vertex) {
+        try {
+            Delete delete = new Delete((byte[]) vertex.getId());
+            handle.vtable.delete(delete);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

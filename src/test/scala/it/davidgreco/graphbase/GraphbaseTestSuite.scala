@@ -35,7 +35,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
       conf.set("hbase.zookeeper.property.clientPort", "21818")
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
-      val v1 = graph.addVertex()
+      val v1 = graph.addVertex(null)
 
       v1.setProperty("A_STRING", "DAVID")
       v1.setProperty("A_LONG", 1234567L)
@@ -55,13 +55,26 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
 
     }
 
+    it("should remove vertexes") {
+      var conf = HBaseConfiguration.create
+      conf.set("hbase.zookeeper.quorum", "localhost")
+      conf.set("hbase.zookeeper.property.clientPort", "21818")
+      val admin = new HBaseAdmin(conf)
+      val graph: Graph = new HBaseGraph(admin, "simple")
+      val v1 = graph.addVertex(null)
+
+      graph.removeVertex(v1)
+
+      assert(graph.getVertex(v1.getId) == null)
+    }
+
     it("should remove vertex properties") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", "21818")
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
-      val v1 = graph.addVertex()
+      val v1 = graph.addVertex(null)
 
       v1.setProperty("A_STRING", "DAVID")
       assert(v1.removeProperty("A_STRING") == "DAVID")
@@ -89,11 +102,11 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
 
-      val v1 = graph.addVertex()
-      val v2 = graph.addVertex()
-      val v3 = graph.addVertex()
-      val v4 = graph.addVertex()
-      val v5 = graph.addVertex()
+      val v1 = graph.addVertex(null)
+      val v2 = graph.addVertex(null)
+      val v3 = graph.addVertex(null)
+      val v4 = graph.addVertex(null)
+      val v5 = graph.addVertex(null)
 
       val e1 = graph.addEdge(null, v1, v2, "e1")
       val e2 = graph.addEdge(null, v1, v3, "e2")
