@@ -1,0 +1,10 @@
+.idea/
+graphbase.iml
+lib_managed/
+out/
+project/boot/
+project/build/target/
+project/plugins/project/
+project/plugins/target/
+project/project.iml
+target/
