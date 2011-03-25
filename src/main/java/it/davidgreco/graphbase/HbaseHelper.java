@@ -14,9 +14,7 @@ public class HbaseHelper {
     final HBaseAdmin admin;
     final String vname;
     final String vnameProperties;
-    final String vnameOutEdgeCounter;
     final String vnameOutEdges;
-    final String vnameInEdgeCounter;
     final String vnameInEdges;
     final String vnameEdgeProperties;
     HTable vtable;
@@ -25,9 +23,7 @@ public class HbaseHelper {
         this.admin = admin;
         this.vname = name;
         this.vnameProperties     = vname + "_properties";
-        this.vnameOutEdgeCounter = vname + "_OutEdgeCounter";
         this.vnameOutEdges       = vname + "_outEdges";
-        this.vnameInEdgeCounter  = vname + "_InEdgeCounter";
         this.vnameInEdges        = vname + "_inEdges";
         this.vnameEdgeProperties = vname + "edge_properties";
         try {
@@ -35,9 +31,7 @@ public class HbaseHelper {
                 admin.createTable(new HTableDescriptor(vname));
                 admin.disableTable(vname);
                 admin.addColumn(vname, new HColumnDescriptor(vnameProperties));
-                admin.addColumn(vname, new HColumnDescriptor(vnameOutEdgeCounter));
                 admin.addColumn(vname, new HColumnDescriptor(vnameOutEdges));
-                admin.addColumn(vname, new HColumnDescriptor(vnameInEdgeCounter));
                 admin.addColumn(vname, new HColumnDescriptor(vnameInEdges));
                 admin.addColumn(vname, new HColumnDescriptor(vnameEdgeProperties));
                 admin.enableTable(vname);

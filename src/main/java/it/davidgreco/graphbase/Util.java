@@ -6,18 +6,24 @@ import com.eaio.uuid.UUID;
 
 public class Util {
 
-    final static byte string_type = 0;
-    final static byte long_type = 1;
-    final static byte int_type = 2;
-    final static byte short_type = 3;
-    final static byte float_type = 4;
-    final static byte double_type = 5;
-    final static byte boolean_type = 6;
+    final static byte bytearray_type = 0;
+    final static byte string_type = 1;
+    final static byte long_type = 2;
+    final static byte int_type = 3;
+    final static byte short_type = 4;
+    final static byte float_type = 5;
+    final static byte double_type = 6;
+    final static byte boolean_type = 7;
     final static byte non_supported_type = 100;
 
     static byte[] generateVertexId() {
         UUID rid = new UUID();
         return Bytes.add(Bytes.toBytes(rid.getTime()), Bytes.toBytes(rid.getClockSeqAndNode()));
+    }
+
+    static byte[] generateEdgeLocalId() {
+        UUID rid = new UUID();
+        return Bytes.toBytes(rid.getTime());
     }
 
     static byte[] generateEdgeId(byte[] vertexId, long localId) {
@@ -65,10 +71,14 @@ public class Util {
             otype = double_type;
         else if (obj instanceof Boolean)
             otype = boolean_type;
+        else if (obj instanceof byte[])
+            otype = bytearray_type;
 
         byte[] otypeb = new byte[1];
         otypeb[0] = otype;
         switch (otype) {
+            case bytearray_type:
+                return Bytes.add(otypeb, (byte[]) obj);
             case string_type:
                return Bytes.add(otypeb, Bytes.toBytes((String) obj));
             case long_type:
@@ -92,6 +102,8 @@ public class Util {
     static Object bytesToTypedObject(byte[] bvalue) {
         byte[] vbuffer = Bytes.tail(bvalue, bvalue.length-1);
         switch (bvalue[0]) {
+            case bytearray_type:
+                return vbuffer;
             case string_type:
                return Bytes.toString(vbuffer);
             case long_type:

@@ -22,8 +22,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
             vertex.setId(id);
             vertex.setHandle(handle);
             Put put = new Put(id);
-            put.add(Bytes.toBytes(handle.vnameOutEdgeCounter), null, Bytes.toBytes(0L));
-            put.add(Bytes.toBytes(handle.vnameInEdgeCounter), null, Bytes.toBytes(0L));
+            put.add(Bytes.toBytes(handle.vnameProperties), null, null);
             handle.vtable.put(put);
             return vertex;
         } catch (IOException e) {
@@ -71,21 +70,15 @@ public class HBaseGraph implements Graph, IndexableGraph {
             Get gIn = new Get((byte[]) inVertex.getId());
             Result resultIn = handle.vtable.get(gIn);
             if (!resultIn.isEmpty() && !resultOut.isEmpty()) {
-
-                long outEdgeCounter = Bytes.toLong(resultOut.getValue(Bytes.toBytes(handle.vnameOutEdgeCounter), null));
+                byte[] edgeLocalId = Util.generateEdgeLocalId();
                 Put outPut = new Put((byte[]) outVertex.getId());
-                outPut.add(Bytes.toBytes(handle.vnameOutEdges), Bytes.toBytes(outEdgeCounter), (byte[]) inVertex.getId());
-                outPut.add(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId("label", outEdgeCounter), Bytes.toBytes(label));
-                byte[] edgeId = Util.generateEdgeId((byte[]) outVertex.getId(), outEdgeCounter);
-                outEdgeCounter++;
-                outPut.add(Bytes.toBytes(handle.vnameOutEdgeCounter), null, Bytes.toBytes(outEdgeCounter));
+                outPut.add(Bytes.toBytes(handle.vnameOutEdges), edgeLocalId, (byte[]) inVertex.getId());
+                outPut.add(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId("label", edgeLocalId), Bytes.toBytes(label));
+                byte[] edgeId = Util.generateEdgeId((byte[]) outVertex.getId(), edgeLocalId);
                 handle.vtable.put(outPut);
 
-                long inEdgeCounter = Bytes.toLong(resultIn.getValue(Bytes.toBytes(handle.vnameInEdgeCounter), null));
                 Put inPut = new Put((byte[]) inVertex.getId());
-                inPut.add(Bytes.toBytes(handle.vnameInEdges), Bytes.toBytes(inEdgeCounter), edgeId);
-                inEdgeCounter++;
-                inPut.add(Bytes.toBytes(handle.vnameInEdgeCounter), null, Bytes.toBytes(inEdgeCounter));
+                inPut.add(Bytes.toBytes(handle.vnameInEdges), edgeLocalId, edgeId);
                 handle.vtable.put(inPut);
 
                 HBaseEdge edge = new HBaseEdge();
