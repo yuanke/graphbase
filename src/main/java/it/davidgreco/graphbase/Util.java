@@ -26,16 +26,8 @@ public class Util {
         return Bytes.toBytes(rid.getTime());
     }
 
-    static byte[] generateEdgeId(byte[] vertexId, long localId) {
-        return generateEdgeId(vertexId, Bytes.toBytes(localId));
-    }
-
     static byte[] generateEdgeId(byte[] vertexId, byte[] localId) {
         return Bytes.add(vertexId, localId);
-    }
-
-    static byte[] generateEdgePropertyId(String pkey, long localId) {
-        return generateEdgePropertyId(pkey, Bytes.toBytes(localId));
     }
 
     static byte[] generateEdgePropertyId(String pkey, byte[] localId) {
