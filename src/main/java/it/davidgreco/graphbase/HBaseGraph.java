@@ -146,12 +146,12 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public <T extends Element> Index<T> createIndex(String s, Class<T> tClass, Index.Type type) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return new HBaseIndex<T>();
     }
 
     @Override
     public <T extends Element> Index<T> getIndex(String s, Class<T> tClass) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return new HBaseIndex<T>();
     }
 
     @Override
