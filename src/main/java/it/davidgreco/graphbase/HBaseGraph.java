@@ -5,6 +5,8 @@ import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.NavigableMap;
+import java.util.Set;
 
 public class HBaseGraph implements Graph, IndexableGraph {
 
@@ -64,20 +66,24 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public Edge addEdge(Object o, Vertex outVertex, Vertex inVertex, String label) {
+        RowLock lockOut = null;
+        RowLock lockIn = null;
         try {
             Get gOut = new Get((byte[]) outVertex.getId());
             Result resultOut = handle.vtable.get(gOut);
             Get gIn = new Get((byte[]) inVertex.getId());
             Result resultIn = handle.vtable.get(gIn);
             if (!resultIn.isEmpty() && !resultOut.isEmpty()) {
+                lockOut = handle.vtable.lockRow((byte[]) outVertex.getId());
+                lockIn = handle.vtable.lockRow((byte[]) inVertex.getId());
                 byte[] edgeLocalId = Util.generateEdgeLocalId();
-                Put outPut = new Put((byte[]) outVertex.getId());
+                Put outPut = new Put((byte[]) outVertex.getId(), lockOut);
                 outPut.add(Bytes.toBytes(handle.vnameOutEdges), edgeLocalId, (byte[]) inVertex.getId());
                 outPut.add(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId("label", edgeLocalId), Bytes.toBytes(label));
                 byte[] edgeId = Util.generateEdgeId((byte[]) outVertex.getId(), edgeLocalId);
                 handle.vtable.put(outPut);
 
-                Put inPut = new Put((byte[]) inVertex.getId());
+                Put inPut = new Put((byte[]) inVertex.getId(), lockIn);
                 inPut.add(Bytes.toBytes(handle.vnameInEdges), edgeLocalId, edgeId);
                 handle.vtable.put(inPut);
 
@@ -93,6 +99,21 @@ public class HBaseGraph implements Graph, IndexableGraph {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (lockOut != null) {
+                try {
+                    handle.vtable.unlockRow(lockOut);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (lockIn != null) {
+                try {
+                    handle.vtable.unlockRow(lockIn);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
@@ -109,6 +130,11 @@ public class HBaseGraph implements Graph, IndexableGraph {
                 return null;
 
             byte[] inVertexId = result.getValue(Bytes.toBytes(handle.vnameOutEdges), struct.edgeLocalId);
+
+            if (inVertexId == null) {
+                return null;
+            }
+
             String label = Bytes.toString(result.getValue(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId("label", struct.edgeLocalId)));
 
             HBaseEdge edge = new HBaseEdge();
@@ -129,6 +155,34 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public void removeEdge(Edge edge) {
+        try {
+            byte[] outVertexId = (byte[]) edge.getOutVertex().getId();
+            byte[] inVertexId = (byte[]) edge.getInVertex().getId();
+            Get gOut = new Get(outVertexId);
+            Result resultOut = handle.vtable.get(gOut);
+            Get gIn = new Get(inVertexId);
+            Result resultIn = handle.vtable.get(gIn);
+            if (!resultIn.isEmpty() && !resultOut.isEmpty()) {
+                Util.EdgeIdStruct struct = Util.getEdgeIdStruct((byte[]) edge.getId());
+                Delete delete = new Delete(gOut.getRow());
+                delete.deleteColumns(Bytes.toBytes(handle.vnameOutEdges), struct.edgeLocalId);
+                NavigableMap<byte[], byte[]> familyMap = resultOut.getFamilyMap(Bytes.toBytes(handle.vnameEdgeProperties));
+                Set<byte[]> bkeys = familyMap.keySet();
+                for (byte[] bkey : bkeys) {
+                    byte[] id = Bytes.tail(bkey, 8);
+                    if (Bytes.equals(id, struct.edgeLocalId)) {
+                        delete.deleteColumns(Bytes.toBytes(handle.vnameEdgeProperties), bkey);
+                    }
+                }
+                handle.vtable.delete(delete);
+                delete = new Delete(gIn.getRow());
+                delete.deleteColumns(Bytes.toBytes(handle.vnameInEdges), struct.edgeLocalId);
+                handle.vtable.delete(delete);
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -13,12 +13,14 @@ import scala.collection.JavaConversions._
 @RunWith(classOf[JUnitRunner])
 class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHbase {
 
+  val port = "21818"
+
   describe("A graph") {
 
     it("should create and retrieve vertexes") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", "21818")
+      conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
 
@@ -32,7 +34,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     it("should add and retrieve vertex properties") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", "21818")
+      conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
       val v1 = graph.addVertex(null)
@@ -58,7 +60,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     it("should remove vertexes") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", "21818")
+      conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
       val v1 = graph.addVertex(null)
@@ -71,7 +73,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     it("should remove vertex properties") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", "21818")
+      conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
       val v1 = graph.addVertex(null)
@@ -84,7 +86,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     it("should complain on non supported property type") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", "21818")
+      conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
 
@@ -98,7 +100,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     it("should create and retrieve edges") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", "21818")
+      conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
 
@@ -173,7 +175,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     it("should create and retrieve edge properties") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", "21818")
+      conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
 
@@ -221,7 +223,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     it("should remove edge properties") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", "21818")
+      conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
       val graph: Graph = new HBaseGraph(admin, "simple")
       val v1 = graph.addVertex(null)
@@ -232,6 +234,72 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
       assert(e1.removeProperty("A_STRING") == "DAVID")
       assert(e1.getProperty("A_STRING") == null)
     }
+  }
+
+  it("should remove edges") {
+    var conf = HBaseConfiguration.create
+    conf.set("hbase.zookeeper.quorum", "localhost")
+    conf.set("hbase.zookeeper.property.clientPort", port)
+    val admin = new HBaseAdmin(conf)
+    val graph: Graph = new HBaseGraph(admin, "simple")
+
+    val v1 = graph.addVertex(null)
+    val v2 = graph.addVertex(null)
+    val v3 = graph.addVertex(null)
+    val e1 = graph.addEdge(null, v1, v2, "e1")
+    val e2 = graph.addEdge(null, v1, v3, "e2")
+
+    assert(v2.getInEdges.size == 1)
+    assert(v1.getOutEdges.size == 2)
+    assert(v3.getInEdges.size == 1)
+
+    e1.setProperty("A_STRING", "DAVID")
+    e1.setProperty("A_LONG", 1234567L)
+    e1.setProperty("AN_INT", 123456)
+    e1.setProperty("A_SHORT", 1234)
+    e1.setProperty("A_FLOAT", 3.1415926535F)
+    e1.setProperty("A_DOUBLE", 3.1415926535D)
+    e1.setProperty("A_BOOLEAN", true)
+
+    e2.setProperty("A_STRING", "DAVID")
+    e2.setProperty("A_LONG", 1234567L)
+    e2.setProperty("AN_INT", 123456)
+    e2.setProperty("A_SHORT", 1234)
+    e2.setProperty("A_FLOAT", 3.1415926535F)
+    e2.setProperty("A_DOUBLE", 3.1415926535D)
+    e2.setProperty("A_BOOLEAN", true)
+
+    graph.removeEdge(e1);
+    assert(v2.getInEdges.size == 0)
+    assert(v1.getOutEdges.size == 1)
+    assert(v3.getInEdges.size == 1)
+
+    graph.removeEdge(e2);
+    assert(v2.getInEdges.size == 0)
+    assert(v1.getOutEdges.size == 0)
+    assert(v3.getInEdges.size == 0)
+
+    val e1n = graph.getEdge(e1.getId)
+    val e2n = graph.getEdge(e2.getId)
+
+    assert(e1n == null)
+    assert(e2n == null)
+
+    assert(e1.getProperty("A_STRING") == null)
+    assert(e1.getProperty("A_LONG") == null)
+    assert(e1.getProperty("AN_INT") == null)
+    assert(e1.getProperty("A_SHORT") == null)
+    assert(e1.getProperty("A_FLOAT") == null)
+    assert(e1.getProperty("A_DOUBLE") == null)
+    assert(e1.getProperty("A_BOOLEAN") == null)
+
+    assert(e2.getProperty("A_STRING") == null)
+    assert(e2.getProperty("A_LONG") == null)
+    assert(e2.getProperty("AN_INT") == null)
+    assert(e2.getProperty("A_SHORT") == null)
+    assert(e2.getProperty("A_FLOAT") == null)
+    assert(e2.getProperty("A_DOUBLE") == null)
+    assert(e2.getProperty("A_BOOLEAN") == null)
   }
 
   def toString(id: AnyRef): String = Bytes.toString(id.asInstanceOf[Array[Byte]]);
