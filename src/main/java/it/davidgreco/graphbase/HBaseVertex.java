@@ -48,7 +48,6 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Iterable<Edge> getInEdges() {
         try {
             Get get = new Get(id);
@@ -56,7 +55,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             if (result.isEmpty())
                 return null;
             Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(handle.vnameInEdges)).entrySet();
-            List inEdges = new ArrayList();
+            List inEdges = new ArrayList<Edge>();
             for (Map.Entry<byte[], byte[]> e : set) {
                 Util.EdgeIdStruct struct = Util.getEdgeIdStruct(e.getValue());
                 HBaseEdge edge = new HBaseEdge();
@@ -76,6 +75,16 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public Iterable<Edge> getOutEdges(String s) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public Iterable<Edge> getInEdges(String s) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

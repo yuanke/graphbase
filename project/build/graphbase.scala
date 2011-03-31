@@ -10,7 +10,7 @@ class GraphBase(info: ProjectInfo) extends DefaultProject(info) {
   val TempThrift = "Temporary Thrift Repository" at "http://people.apache.org/~rawson/repo/"
   val EaioRepository = "Eaio UUID library Repository" at "http://eaio.com/maven2"
 
-  val tinkerpop = "com.tinkerpop" % "blueprints" % "0.4" intransitive
+  val tinkerpop = "com.tinkerpop" % "blueprints" % "0.5" intransitive
   val eaio = "com.eaio.uuid" % "uuid" % "3.2"
 
   //Testing

@@ -1,16 +1,19 @@
 package it.davidgreco.graphbase;
 
 import com.tinkerpop.blueprints.pgm.*;
+import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NavigableMap;
 import java.util.Set;
 
 public class HBaseGraph implements Graph, IndexableGraph {
 
-    private final HbaseHelper handle;
+    final HbaseHelper handle;
 
     public HBaseGraph(HBaseAdmin admin, String name) {
         this.handle = new HbaseHelper(admin, name);
@@ -199,22 +202,38 @@ public class HBaseGraph implements Graph, IndexableGraph {
     }
 
     @Override
-    public <T extends Element> Index<T> createIndex(String s, Class<T> tClass, Index.Type type) {
-        return new HBaseIndex<T>();
+    public <T extends Element> Index<T> createManualIndex(String indexName, Class<T> indexClass) {
+        return new HBaseManualIndex<T>(this, indexName, indexClass);
     }
 
     @Override
-    public <T extends Element> Index<T> getIndex(String s, Class<T> tClass) {
-        return new HBaseIndex<T>();
+    public <T extends Element> AutomaticIndex<T> createAutomaticIndex(String s, Class<T> tClass, Set<String> strings) {
+        return null;
+    }
+
+    @Override
+    public <T extends Element> Index<T> getIndex(String indexName, Class<T> indexClass) {
+        return new HBaseManualIndex<T>(this, indexName, indexClass);
     }
 
     @Override
     public Iterable<Index<? extends Element>> getIndices() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        try {
+            List<Index<? extends Element>> indexes = new ArrayList<Index<? extends Element>>();
+            HTableDescriptor[] tables = handle.admin.listTables();
+            for(int i=0; i<tables.length; ++i) {
+                if(tables[i].getNameAsString().startsWith("manual_index_" + handle.vname)) {
+
+                }
+            }
+            return indexes;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void dropIndex(String s) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void dropIndex(String name) {
+        handle.dropIndexTable(name);
     }
 }
