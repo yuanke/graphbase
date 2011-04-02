@@ -28,14 +28,14 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
       val e1 = graph.addEdge(null, v1, v2, "e1")
       val e2 = graph.addEdge(null, v1, v3, "e2")
 
-      val index  = graph.createManualIndex("test-idx", classOf[Vertex])
+      val index  = graph.createManualIndex("test-idx_v", classOf[Vertex])
 
       index.put("Name", "David", v1)
       index.put("Name", "David", v4)
       index.put("Name", "Paolo", v2)
       index.put("Name", "Marco", v3)
 
-      val rindex = graph.getIndex("test-idx", classOf[Vertex])
+      val rindex = graph.getIndex("test-idx_v", classOf[Vertex])
 
       val v1n = rindex.get("Name", "David").toIndexedSeq
       assert(v1n.length == 2)
@@ -53,7 +53,7 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
       assert(v3n.length == 1)
       assert(toString(v3n.apply(0).getId) == toString(v3.getId))
 
-      val eindex = graph.createManualIndex("test-idx", classOf[Edge])
+      val eindex = graph.createManualIndex("test-idx_e", classOf[Edge])
 
       eindex.put("Label", "E1", e1)
       eindex.put("Label", "E2", e2)

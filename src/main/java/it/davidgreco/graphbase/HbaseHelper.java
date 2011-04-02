@@ -1,5 +1,8 @@
 package it.davidgreco.graphbase;
 
+import com.tinkerpop.blueprints.pgm.Edge;
+import com.tinkerpop.blueprints.pgm.Element;
+import com.tinkerpop.blueprints.pgm.Vertex;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
@@ -8,16 +11,21 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HbaseHelper {
 
-    final HBaseAdmin admin;
-    final String vname;
-    final String vnameProperties;
-    final String vnameOutEdges;
-    final String vnameInEdges;
-    final String vnameEdgeProperties;
-    final String elementIds = "elementIds";
+    private final HBaseAdmin admin;
+    private final String vname;
+    private final String vnameProperties;
+    private final String vnameOutEdges;
+    private final String vnameInEdges;
+    private final String vnameEdgeProperties;
+    private final String elementIds = "elementIds";
+    private final String indexSepString = "-";
+    private final String indexEKind = "e";
+    private final String indexVKind = "v";
     HTable vtable;
 
     public HbaseHelper(HBaseAdmin admin, String name) {
@@ -47,9 +55,11 @@ public class HbaseHelper {
         }
     }
 
-    public HTable createIndexTable(String indexName) {
+    public <T extends Element> HTable createIndexTable(String indexName, Class<T> indexClass) {
         try {
-            String tableName = vname + "_" + indexName;
+            if (!doesNotExist(indexName, indexClass))
+                throw new RuntimeException("An index with this name " + indexName + " already exists");
+            String tableName = getIndexTableName(indexName, indexClass);
             if (!admin.tableExists(tableName)) {
                 admin.createTable(new HTableDescriptor(tableName));
                 admin.disableTable(tableName);
@@ -66,12 +76,23 @@ public class HbaseHelper {
         }
     }
 
-    public void dropIndexTable(String indexName) {
+    public <T extends Element> void dropIndexTable(String indexName) {
         try {
-            String tableName = vname + "_" + indexName;
-            if (admin.tableExists(tableName)) {
-                admin.disableTable(tableName);
-                admin.deleteTable(tableName);
+            String tableName = null;
+            HTableDescriptor[] tables = admin.listTables();
+            for (int i = 0; i < tables.length; ++i) {
+                String tname = tables[i].getNameAsString();
+                if (tname.startsWith(getIndexTableName(indexName, indexVKind)) || tname.startsWith(getIndexTableName(indexName, indexEKind))) {
+                    tableName = tname;
+                    break;
+                }
+            }
+
+            if (tableName != null) {
+                if (admin.tableExists(tableName)) {
+                    admin.disableTable(tableName);
+                    admin.deleteTable(tableName);
+                }
             }
         } catch (MasterNotRunningException e) {
             throw new RuntimeException(e);
@@ -80,6 +101,67 @@ public class HbaseHelper {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Iterable<String> getIndexNames() {
+        try {
+            List<String> indexNames = new ArrayList<String>();
+            HTableDescriptor[] tables = admin.listTables();
+            for (int i = 0; i < tables.length; ++i) {
+                String tname = tables[i].getNameAsString();
+                if (tname.startsWith("index_" + vname)) {
+                    indexNames.add(tname);
+                }
+            }
+            return indexNames;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private String getIndexTableName(String indexName, String kind) {
+       return "index" + indexSepString + vname + indexSepString + kind + indexSepString + indexName;
+    }
+
+    private <T extends Element> String getIndexTableName(String indexName, Class<T> indexClass) {
+        String kind = null;
+        if (indexClass.equals(Vertex.class)) {
+            kind = indexVKind;
+        } else if (indexClass.equals(Edge.class)) {
+            kind = indexEKind;
+        }
+        if (kind == null) {
+            throw new RuntimeException("indexClass not supported");
+        }
+        return getIndexTableName(indexName, kind);
+    }
+
+    private <T extends Element> boolean doesNotExist(String indexName, Class<T> indexClass) {
+        try {
+            String kind = null;
+            if (indexClass.equals(Vertex.class)) {
+                HTableDescriptor[] tables = admin.listTables();
+                for (int i = 0; i < tables.length; ++i) {
+                    String tableName = tables[i].getNameAsString();
+                    if (tableName.startsWith(getIndexTableName(indexName, indexVKind))) {
+                        return false;
+                    }
+                }
+            } else if (indexClass.equals(Edge.class)) {
+                HTableDescriptor[] tables = admin.listTables();
+                for (int i = 0; i < tables.length; ++i) {
+                    String tableName = tables[i].getNameAsString();
+                    if (tableName.startsWith(getIndexTableName(indexName, indexEKind)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 }

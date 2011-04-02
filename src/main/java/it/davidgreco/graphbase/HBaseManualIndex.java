@@ -24,7 +24,7 @@ public class HBaseManualIndex<T extends Element> implements Index<T> {
         this.name = name;
         this.indexClass = indexClass;
         this.graph = graph;
-        this.indexTable = graph.handle.createIndexTable("manual_index_" + name + "_" + indexClass.getSimpleName());
+        this.indexTable = graph.handle.createIndexTable(name, indexClass);
     }
 
     @Override

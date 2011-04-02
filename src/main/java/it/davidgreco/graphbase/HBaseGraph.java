@@ -219,12 +219,11 @@ public class HBaseGraph implements Graph, IndexableGraph {
     @Override
     public Iterable<Index<? extends Element>> getIndices() {
         try {
+            Iterable<String> indexInternalNames = handle.getIndexNames();
             List<Index<? extends Element>> indexes = new ArrayList<Index<? extends Element>>();
             HTableDescriptor[] tables = handle.admin.listTables();
-            for(int i=0; i<tables.length; ++i) {
-                if(tables[i].getNameAsString().startsWith("manual_index_" + handle.vname)) {
+            for(String in: indexInternalNames) {
 
-                }
             }
             return indexes;
         } catch (IOException e) {
