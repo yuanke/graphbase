@@ -16,16 +16,16 @@ import java.util.List;
 
 public class HbaseHelper {
 
-    private final HBaseAdmin admin;
-    private final String vname;
-    private final String vnameProperties;
-    private final String vnameOutEdges;
-    private final String vnameInEdges;
-    private final String vnameEdgeProperties;
-    private final String elementIds = "elementIds";
-    private final String indexSepString = "-";
-    private final String indexEKind = "e";
-    private final String indexVKind = "v";
+    final HBaseAdmin admin;
+    final String vname;
+    final String vnameProperties;
+    final String vnameOutEdges;
+    final String vnameInEdges;
+    final String vnameEdgeProperties;
+    final String elementIds = "elementIds";
+    final String indexSepString = "-";
+    final String indexEKind = "e";
+    final String indexVKind = "v";
     HTable vtable;
 
     public HbaseHelper(HBaseAdmin admin, String name) {
@@ -144,7 +144,7 @@ public class HbaseHelper {
                 HTableDescriptor[] tables = admin.listTables();
                 for (int i = 0; i < tables.length; ++i) {
                     String tableName = tables[i].getNameAsString();
-                    if (tableName.startsWith(getIndexTableName(indexName, indexVKind))) {
+                    if (tableName.startsWith(getIndexTableName(indexName, indexEKind))) {
                         return false;
                     }
                 }
@@ -152,7 +152,7 @@ public class HbaseHelper {
                 HTableDescriptor[] tables = admin.listTables();
                 for (int i = 0; i < tables.length; ++i) {
                     String tableName = tables[i].getNameAsString();
-                    if (tableName.startsWith(getIndexTableName(indexName, indexEKind)) {
+                    if (tableName.startsWith(getIndexTableName(indexName, indexVKind))) {
                         return false;
                     }
                 }

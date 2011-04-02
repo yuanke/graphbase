@@ -195,10 +195,12 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public void clear() {
+        throw new RuntimeException("Not supported");
     }
 
     @Override
     public void shutdown() {
+        throw new RuntimeException("Not supported");
     }
 
     @Override
