@@ -14,7 +14,7 @@ import java.util.TreeSet;
 
 public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
 
-    private HBaseHelper handle;
+    private Helper handle;
     private byte[] id;
     private HBaseVertex outVertex;
     private HBaseVertex inVertex;
@@ -128,7 +128,7 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
         this.label = label;
     }
 
-    void setHandle(HBaseHelper handle) {
+    void setHandle(Helper handle) {
         this.handle = handle;
     }
 
