@@ -19,9 +19,9 @@ public class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
     private final HBaseGraph graph;
     private final String name;
     private final Class<T> indexClass;
-    private final ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables;
+    private final ConcurrentHashMap<String, HbaseHelper.IndexTableStruct> indexTables;
 
-    HBaseIndex(HBaseGraph graph, String name, Class<T> indexClass, ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables) {
+    HBaseIndex(HBaseGraph graph, String name, Class<T> indexClass, ConcurrentHashMap<String, HbaseHelper.IndexTableStruct> indexTables) {
         this.graph = graph;
         this.name = name;
         this.indexClass = indexClass;
@@ -46,7 +46,7 @@ public class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
     @Override
     public void put(String key, Object value, T element) {
         try {
-            HBaseHelper.IndexTableStruct struct = indexTables.get(key);
+            HbaseHelper.IndexTableStruct struct = indexTables.get(key);
             if (struct == null) {
                 throw new RuntimeException("Something went wrong"); //todo better error message
             }
@@ -61,7 +61,7 @@ public class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
     @Override
     public Iterable<T> get(String key, Object value) {
         try {
-            HBaseHelper.IndexTableStruct struct = indexTables.get(key);
+            HbaseHelper.IndexTableStruct struct = indexTables.get(key);
             if (struct == null) {
                 throw new RuntimeException("Something went wrong"); //todo better error message
             }
@@ -88,7 +88,7 @@ public class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
     @Override
     public void remove(String key, Object value, T element) {
         try {
-            HBaseHelper.IndexTableStruct struct = indexTables.get(key);
+            HbaseHelper.IndexTableStruct struct = indexTables.get(key);
             if (struct == null) {
                 throw new RuntimeException("Something went wrong"); //todo better error message
             }
