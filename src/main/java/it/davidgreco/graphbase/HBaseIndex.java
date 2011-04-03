@@ -66,7 +66,7 @@ public class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
             Get get = new Get(Util.typedObjectToBytes(value));
             Result result = struct.indexTable.get(get);
             if (!result.isEmpty()) {
-                Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(graph.handle.getIndexTableColumnName(name, this.indexClass, key))).entrySet();
+                Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(graph.handle.getIndexTableColumnName(name, key))).entrySet();
                 for (Map.Entry<byte[], byte[]> e : set) {
                     if (indexClass.equals(Vertex.class)) {
                         elements.add((T) graph.getVertex(e.getValue()));

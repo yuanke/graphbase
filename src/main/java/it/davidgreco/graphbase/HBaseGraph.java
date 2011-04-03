@@ -1,22 +1,29 @@
 package it.davidgreco.graphbase;
 
 import com.tinkerpop.blueprints.pgm.*;
+import org.apache.hadoop.hbase.avro.generated.HBase;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NavigableMap;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HBaseGraph implements Graph, IndexableGraph {
 
     final HBaseHelper handle;
+    final ConcurrentHashMap<Short, List<Index>> indices;
 
     public HBaseGraph(HBaseAdmin admin, String name) {
         this.handle = new HBaseHelper(admin, name);
+        this.indices = new ConcurrentHashMap<Short, List<Index>>();
+        this.indices.put(HBaseHelper.elementClass, new ArrayList<Index>());
+        this.indices.put(HBaseHelper.vertexClass, new ArrayList<Index>());
+        this.indices.put(HBaseHelper.edgeClass, new ArrayList<Index>());
+        Iterable<Index<? extends Element>> iterable = this.getIndices();
+        for (Index<? extends Element> index : iterable) {
+            indices.get(handle.getClass(index.getIndexClass())).add(index);
+        }
     }
 
     @Override
@@ -25,7 +32,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
             byte[] id = Util.generateVertexId();
             HBaseVertex vertex = new HBaseVertex();
             vertex.setId(id);
-            vertex.setHandle(handle);
+            vertex.setGraph(this);
             Put put = new Put(id);
             put.add(Bytes.toBytes(handle.vnameProperties), null, null);
             handle.vtable.put(put);
@@ -45,7 +52,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
                 return null;
 
             HBaseVertex vertex = new HBaseVertex();
-            vertex.setHandle(handle);
+            vertex.setGraph(this);
             vertex.setId((byte[]) id);
             return vertex;
         } catch (IOException e) {
@@ -212,13 +219,17 @@ public class HBaseGraph implements Graph, IndexableGraph {
     @Override
     public <T extends Element> AutomaticIndex<T> createAutomaticIndex(String indexName, Class<T> indexClass, Set<String> keys) {
         ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables = handle.createAutomaticIndexTables(indexName, indexClass, keys);
-        return new HBaseIndex(this, indexName, indexClass, indexTables);
+        HBaseIndex index = new HBaseIndex(this, indexName, indexClass, indexTables);
+        indices.get(handle.getClass(indexClass)).add(index);
+        return index;
     }
 
     @Override
     public <T extends Element> Index<T> getIndex(String indexName, Class<T> indexClass) {
         ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables = handle.getAutomaticIndexTables(indexName, indexClass);
-        return new HBaseIndex(this, indexName, indexClass, indexTables);
+        HBaseIndex index = new HBaseIndex(this, indexName, indexClass, indexTables);
+        indices.get(handle.getClass(indexClass)).add(index);
+        return index;
     }
 
     @Override
@@ -229,29 +240,26 @@ public class HBaseGraph implements Graph, IndexableGraph {
             ResultScanner vscanner = handle.ivtable.getScanner(vscan);
             for (Result res : vscanner) {
                 String indexName = Bytes.toString(res.getRow());
+                short ic = Bytes.toShort(res.getValue(Bytes.toBytes(handle.ivnameClass), null));
                 ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables = handle.getAutomaticIndexTables(indexName, Vertex.class);
-                indexes.add(new HBaseIndex(this, indexName, Vertex.class, indexTables));
+                indexes.add(new HBaseIndex(this, indexName, handle.getClass(ic), indexTables));
             }
             vscanner.close();
-
-            Scan escan = new Scan();
-            ResultScanner escanner = handle.ietable.getScanner(escan);
-            for (Result res : escanner) {
-                String indexName = Bytes.toString(res.getRow());
-                ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables = handle.getAutomaticIndexTables(indexName, Edge.class);
-                indexes.add(new HBaseIndex(this, indexName, Edge.class, indexTables));
-            }
-            escanner.close();
-
             return indexes;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     @Override
     public void dropIndex(String name) {
         handle.dropIndexTables(name);
+        for (Map.Entry<Short, List<Index>> e : indices.entrySet()) {
+            for (Index i : e.getValue()) {
+                if (i.getIndexName().equals(name)) {
+                    e.getValue().remove(i);
+                }
+            }
+        }
     }
 }

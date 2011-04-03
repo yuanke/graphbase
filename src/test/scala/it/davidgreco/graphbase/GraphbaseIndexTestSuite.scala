@@ -6,7 +6,7 @@ import org.scalatest.{BeforeAndAfterEach, Spec}
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.util.Bytes
-import com.tinkerpop.blueprints.pgm.{Edge, Vertex, IndexableGraph}
+import com.tinkerpop.blueprints.pgm.{Element, Edge, Vertex, IndexableGraph}
 
 class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHbase {
 
@@ -30,8 +30,8 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
 
       val i1 = graph.createAutomaticIndex("idx1", classOf[Vertex], Set("FirstName", "FamilyName"))
 
-      i1.put("FirstName", "David", v1)
-      i1.put("FamilyName", "Greco", v1)
+      v1.setProperty("FirstName", "David")
+      v1.setProperty("FamilyName", "Greco");
 
       val i2 = graph.getIndex("idx1", classOf[Vertex])
       val v1n1 = i2.get("FirstName", "David")
