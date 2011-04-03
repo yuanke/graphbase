@@ -19,9 +19,9 @@ public class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
     private final HBaseGraph graph;
     private final String name;
     private final Class<T> indexClass;
-    private final ConcurrentHashMap<String, HTable> indexTables;
+    private final ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables;
 
-    HBaseIndex(HBaseGraph graph, String name, Class<T> indexClass, ConcurrentHashMap<String, HTable> indexTables) {
+    HBaseIndex(HBaseGraph graph, String name, Class<T> indexClass, ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables) {
         this.graph = graph;
         this.name = name;
         this.indexClass = indexClass;
@@ -46,25 +46,28 @@ public class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
     @Override
     public void put(String key, Object value, T element) {
         try {
+            HBaseHelper.IndexTableStruct struct = indexTables.get(key);
+            if (struct == null) {
+                throw new RuntimeException("Something went wrong"); //todo better error message
+            }
             Put put = new Put(Util.typedObjectToBytes(value));
-            put.add(Bytes.toBytes(graph.handle.getIndexTableColumnName(name, this.indexClass, key)), (byte[]) element.getId(), (byte[]) element.getId());
-            HTable table = indexTables.get(key);
-            table.put(put);
+            put.add(Bytes.toBytes(struct.indexColumnName), (byte[]) element.getId(), (byte[]) element.getId());
+            struct.indexTable.put(put);
         } catch (IOException e) {
-            new RuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     public Iterable<T> get(String key, Object value) {
         try {
-            Get get = new Get(Util.typedObjectToBytes(value));
-            HTable table = indexTables.get(key);
-            List<T> elements = new ArrayList<T>();
-            if (table == null) {
-                return elements;
+            HBaseHelper.IndexTableStruct struct = indexTables.get(key);
+            if (struct == null) {
+                throw new RuntimeException("Something went wrong"); //todo better error message
             }
-            Result result = table.get(get);
+            List<T> elements = new ArrayList<T>();
+            Get get = new Get(Util.typedObjectToBytes(value));
+            Result result = struct.indexTable.get(get);
             if (!result.isEmpty()) {
                 Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(graph.handle.getIndexTableColumnName(name, this.indexClass, key))).entrySet();
                 for (Map.Entry<byte[], byte[]> e : set) {

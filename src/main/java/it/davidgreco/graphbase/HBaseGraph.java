@@ -209,13 +209,13 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public <T extends Element> AutomaticIndex<T> createAutomaticIndex(String indexName, Class<T> indexClass, Set<String> keys) {
-        ConcurrentHashMap<String, HTable> indexTables = handle.createAutomaticIndexTables(indexName, indexClass, keys);
+        ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables = handle.createAutomaticIndexTables(indexName, indexClass, keys);
         return new HBaseIndex(this, indexName, indexClass, indexTables);
     }
 
     @Override
     public <T extends Element> Index<T> getIndex(String indexName, Class<T> indexClass) {
-        ConcurrentHashMap<String, HTable> indexTables = handle.getAutomaticIndexTables(indexName, indexClass);
+        ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables = handle.getAutomaticIndexTables(indexName, indexClass);
         return new HBaseIndex(this, indexName, indexClass, indexTables);
     }
 
