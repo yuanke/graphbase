@@ -1,7 +1,10 @@
 package it.davidgreco.graphbase;
 
 import com.tinkerpop.blueprints.pgm.*;
-import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;

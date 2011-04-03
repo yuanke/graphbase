@@ -45,7 +45,7 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
             Get get = new Get(struct.vertexId);
             Result result = handle.vtable.get(get);
             byte[] bvalue = result.getValue(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId));
-            if(bvalue == null)
+            if (bvalue == null)
                 return null;
             return Util.bytesToTypedObject(bvalue);
         } catch (IOException e) {

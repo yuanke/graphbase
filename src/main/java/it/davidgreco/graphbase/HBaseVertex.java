@@ -2,7 +2,6 @@ package it.davidgreco.graphbase;
 
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
-import org.apache.hadoop.hbase.avro.generated.HBase;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -11,7 +10,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
 

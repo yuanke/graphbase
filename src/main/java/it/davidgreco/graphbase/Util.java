@@ -1,8 +1,7 @@
 package it.davidgreco.graphbase;
 
-import org.apache.hadoop.hbase.util.Bytes;
-
 import com.eaio.uuid.UUID;
+import org.apache.hadoop.hbase.util.Bytes;
 
 public class Util {
 
@@ -37,8 +36,10 @@ public class Util {
 
     static EdgeIdStruct getEdgeIdStruct(byte[] edgeId) {
         EdgeIdStruct struct = new EdgeIdStruct();
-        struct.vertexId = Bytes.head(edgeId, 16);;
-        struct.edgeLocalId = Bytes.tail(edgeId, 8);;
+        struct.vertexId = Bytes.head(edgeId, 16);
+        ;
+        struct.edgeLocalId = Bytes.tail(edgeId, 8);
+        ;
         return struct;
     }
 
@@ -72,9 +73,9 @@ public class Util {
             case bytearray_type:
                 return Bytes.add(otypeb, (byte[]) obj);
             case string_type:
-               return Bytes.add(otypeb, Bytes.toBytes((String) obj));
+                return Bytes.add(otypeb, Bytes.toBytes((String) obj));
             case long_type:
-                return Bytes.add(otypeb, Bytes.toBytes((Long)obj));
+                return Bytes.add(otypeb, Bytes.toBytes((Long) obj));
             case int_type:
                 return Bytes.add(otypeb, Bytes.toBytes((Integer) obj));
             case short_type:
@@ -92,12 +93,12 @@ public class Util {
     }
 
     static Object bytesToTypedObject(byte[] bvalue) {
-        byte[] vbuffer = Bytes.tail(bvalue, bvalue.length-1);
+        byte[] vbuffer = Bytes.tail(bvalue, bvalue.length - 1);
         switch (bvalue[0]) {
             case bytearray_type:
                 return vbuffer;
             case string_type:
-               return Bytes.toString(vbuffer);
+                return Bytes.toString(vbuffer);
             case long_type:
                 return Bytes.toLong(vbuffer);
             case int_type:

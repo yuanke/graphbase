@@ -1,7 +1,6 @@
 package it.davidgreco.graphbase;
 
 import com.tinkerpop.blueprints.pgm.*;
-import org.apache.hadoop.hbase.avro.generated.HBase;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
