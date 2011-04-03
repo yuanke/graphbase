@@ -12,7 +12,7 @@ import java.util.*;
 
 public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
 
-    private HbaseHelper handle;
+    private HBaseHelper handle;
     private byte[] id;
 
     HBaseVertex() {
@@ -156,7 +156,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
         this.id = id;
     }
 
-    void setHandle(HbaseHelper handle) {
+    void setHandle(HBaseHelper handle) {
         this.handle = handle;
     }
 

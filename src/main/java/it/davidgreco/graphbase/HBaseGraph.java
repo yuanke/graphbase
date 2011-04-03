@@ -1,22 +1,20 @@
 package it.davidgreco.graphbase;
 
 import com.tinkerpop.blueprints.pgm.*;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NavigableMap;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HBaseGraph implements Graph, IndexableGraph {
 
-    final HbaseHelper handle;
+    final HBaseHelper handle;
 
     public HBaseGraph(HBaseAdmin admin, String name) {
-        this.handle = new HbaseHelper(admin, name);
+        this.handle = new HBaseHelper(admin, name);
     }
 
     @Override
@@ -45,6 +43,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
                 return null;
 
             HBaseVertex vertex = new HBaseVertex();
+            vertex.setHandle(handle);
             vertex.setId((byte[]) id);
             return vertex;
         } catch (IOException e) {
@@ -205,36 +204,28 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public <T extends Element> Index<T> createManualIndex(String indexName, Class<T> indexClass) {
-        return new HBaseManualIndex<T>(this, indexName, indexClass);
+        throw new RuntimeException("Not supported");
     }
 
     @Override
-    public <T extends Element> AutomaticIndex<T> createAutomaticIndex(String s, Class<T> tClass, Set<String> strings) {
-        return null;
+    public <T extends Element> AutomaticIndex<T> createAutomaticIndex(String indexName, Class<T> indexClass, Set<String> keys) {
+        ConcurrentHashMap<String, HTable> indexTables = handle.createAutomaticIndexTables(indexName, indexClass, keys);
+        return new HBaseIndex(this, indexName, indexClass, indexTables);
     }
 
     @Override
     public <T extends Element> Index<T> getIndex(String indexName, Class<T> indexClass) {
-        return new HBaseManualIndex<T>(this, indexName, indexClass);
+        ConcurrentHashMap<String, HTable> indexTables = handle.getAutomaticIndexTables(indexName, indexClass);
+        return new HBaseIndex(this, indexName, indexClass, indexTables);
     }
 
     @Override
     public Iterable<Index<? extends Element>> getIndices() {
-        try {
-            Iterable<String> indexInternalNames = handle.getIndexNames();
-            List<Index<? extends Element>> indexes = new ArrayList<Index<? extends Element>>();
-            HTableDescriptor[] tables = handle.admin.listTables();
-            for(String in: indexInternalNames) {
-
-            }
-            return indexes;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return null;
     }
 
     @Override
     public void dropIndex(String name) {
-        handle.dropIndexTable(name);
+
     }
 }
