@@ -16,7 +16,7 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HbaseHelper {
+public class HBaseHelper {
 
     final HBaseAdmin admin;
     final String vname;
@@ -36,7 +36,7 @@ public class HbaseHelper {
     HTable vtable;
     HTable ivtable;
 
-    HbaseHelper(HBaseAdmin admin, String name) {
+    HBaseHelper(HBaseAdmin admin, String name) {
         this.admin = admin;
         this.vname = name;
         this.ivname = name + "_indexes";
