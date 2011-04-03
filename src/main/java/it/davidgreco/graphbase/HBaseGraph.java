@@ -5,6 +5,8 @@ import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -221,11 +223,35 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public Iterable<Index<? extends Element>> getIndices() {
-        return null;
+        try {
+            List<Index<? extends Element>> indexes = new ArrayList<Index<? extends Element>>();
+            Scan vscan = new Scan();
+            ResultScanner vscanner = handle.ivtable.getScanner(vscan);
+            for (Result res : vscanner) {
+                String indexName = Bytes.toString(res.getRow());
+                ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables = handle.getAutomaticIndexTables(indexName, Vertex.class);
+                indexes.add(new HBaseIndex(this, indexName, Vertex.class, indexTables));
+            }
+            vscanner.close();
+
+            Scan escan = new Scan();
+            ResultScanner escanner = handle.ietable.getScanner(escan);
+            for (Result res : escanner) {
+                String indexName = Bytes.toString(res.getRow());
+                ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables = handle.getAutomaticIndexTables(indexName, Edge.class);
+                indexes.add(new HBaseIndex(this, indexName, Edge.class, indexTables));
+            }
+            escanner.close();
+
+            return indexes;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
     public void dropIndex(String name) {
-
+        handle.dropIndexTables(name);
     }
 }

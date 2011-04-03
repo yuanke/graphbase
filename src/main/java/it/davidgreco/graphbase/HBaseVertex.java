@@ -19,7 +19,6 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Iterable<Edge> getOutEdges() {
         try {
             Get get = new Get(id);
@@ -27,7 +26,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             if (result.isEmpty())
                 return null;
             Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(handle.vnameOutEdges)).entrySet();
-            List outEdges = new ArrayList();
+            List<Edge> outEdges = new ArrayList<Edge>();
             for (Map.Entry<byte[], byte[]> e : set) {
                 HBaseEdge edge = new HBaseEdge();
                 edge.setId(Util.generateEdgeId(id, e.getKey()));
@@ -55,7 +54,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             if (result.isEmpty())
                 return null;
             Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(handle.vnameInEdges)).entrySet();
-            List inEdges = new ArrayList<Edge>();
+            List<Edge> inEdges = new ArrayList<Edge>();
             for (Map.Entry<byte[], byte[]> e : set) {
                 Util.EdgeIdStruct struct = Util.getEdgeIdStruct(e.getValue());
                 HBaseEdge edge = new HBaseEdge();
@@ -78,13 +77,65 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
     }
 
     @Override
-    public Iterable<Edge> getOutEdges(String s) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Iterable<Edge> getOutEdges(String label) {
+        try {
+            Get get = new Get(id);
+            Result result = handle.vtable.get(get);
+            if (result.isEmpty())
+                return null;
+            Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(handle.vnameOutEdges)).entrySet();
+            List outEdges = new ArrayList();
+            for (Map.Entry<byte[], byte[]> e : set) {
+                HBaseEdge edge = new HBaseEdge();
+                edge.setId(Util.generateEdgeId(id, e.getKey()));
+                edge.setOutVertex(this);
+                HBaseVertex inVertex = new HBaseVertex();
+                inVertex.setId(e.getValue());
+                inVertex.setHandle(handle);
+                edge.setInVertex(inVertex);
+                String l = Bytes.toString(result.getValue(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId("label", e.getKey())));
+                edge.setLabel(l);
+                edge.setHandle(handle);
+                if (l.equals(label)) {
+                    outEdges.add(edge);
+                }
+            }
+            return outEdges;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public Iterable<Edge> getInEdges(String s) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Iterable<Edge> getInEdges(String label) {
+        try {
+            Get get = new Get(id);
+            Result result = handle.vtable.get(get);
+            if (result.isEmpty())
+                return null;
+            Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(handle.vnameInEdges)).entrySet();
+            List inEdges = new ArrayList<Edge>();
+            for (Map.Entry<byte[], byte[]> e : set) {
+                Util.EdgeIdStruct struct = Util.getEdgeIdStruct(e.getValue());
+                HBaseEdge edge = new HBaseEdge();
+                edge.setId(e.getValue());
+                edge.setInVertex(this);
+                HBaseVertex outVertex = new HBaseVertex();
+                outVertex.setId(struct.vertexId);
+                edge.setOutVertex(outVertex);
+                Get outGet = new Get(struct.vertexId);
+                Result outResult = handle.vtable.get(outGet);
+                String l = Bytes.toString(outResult.getValue(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId("label", e.getKey())));
+                edge.setLabel(l);
+                edge.setHandle(handle);
+                if (l.equals(label)) {
+                    inEdges.add(edge);
+                }
+            }
+            return inEdges;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -93,7 +144,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             Get get = new Get(id);
             Result result = handle.vtable.get(get);
             byte[] bvalue = result.getValue(Bytes.toBytes(handle.vnameProperties), Bytes.toBytes(key));
-            if(bvalue == null)
+            if (bvalue == null)
                 return null;
             return Util.bytesToTypedObject(bvalue);
         } catch (IOException e) {
@@ -109,7 +160,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             NavigableMap<byte[], byte[]> familyMap = result.getFamilyMap(Bytes.toBytes(handle.vnameProperties));
             Set<String> keys = new TreeSet<String>();
             Set<byte[]> bkeys = familyMap.keySet();
-            for(byte[] bkey: bkeys) {
+            for (byte[] bkey : bkeys) {
                 keys.add(Bytes.toString(bkey));
             }
             return keys;
@@ -136,7 +187,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             Get get = new Get(id);
             Result result = handle.vtable.get(get);
             byte[] bvalue = result.getValue(Bytes.toBytes(handle.vnameProperties), Bytes.toBytes(key));
-            if(bvalue == null)
+            if (bvalue == null)
                 return null;
             Delete delete = new Delete(get.getRow());
             delete.deleteColumns(Bytes.toBytes(handle.vnameProperties), Bytes.toBytes(key));

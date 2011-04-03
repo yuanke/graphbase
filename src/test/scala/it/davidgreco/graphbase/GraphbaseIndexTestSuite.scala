@@ -40,6 +40,24 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
       assert(toString(v1.getId) == toString(v1n1.toIndexedSeq.apply(0).getId))
       assert(toString(v1.getId) == toString(v1n2.toIndexedSeq.apply(0).getId))
 
+      val indexes = graph.getIndices
+      assert(indexes.size == 1)
+
+      val i3 = indexes.toIndexedSeq.apply(0)
+      val v1n3 = i2.get("FirstName", "David")
+      val v1n4 = i2.get("FamilyName", "Greco")
+
+      assert(toString(v1.getId) == toString(v1n3.toIndexedSeq.apply(0).getId))
+      assert(toString(v1.getId) == toString(v1n4.toIndexedSeq.apply(0).getId))
+
+      i2.remove("FamilyName", "Greco", v1)
+      val empty = i2.get("FamilyName", "Greco")
+      assert(empty.size == 0)
+
+      graph.dropIndex("idx1")
+      val indexes1 = graph.getIndices
+      assert(indexes1.size == 0)
+
     }
 
   }

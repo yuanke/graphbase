@@ -1,10 +1,7 @@
 package it.davidgreco.graphbase;
 
 import com.tinkerpop.blueprints.pgm.*;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
@@ -86,13 +83,23 @@ public class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
     }
 
     @Override
-    public void remove(String s, Object o, T t) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void remove(String key, Object value, T element) {
+        try {
+            HBaseHelper.IndexTableStruct struct = indexTables.get(key);
+            if (struct == null) {
+                throw new RuntimeException("Something went wrong"); //todo better error message
+            }
+            Delete del = new Delete(Util.typedObjectToBytes(value));
+            del.deleteColumns(Bytes.toBytes(struct.indexColumnName), (byte[]) element.getId());
+            struct.indexTable.delete(del);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public Set<String> getAutoIndexKeys() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return indexTables.keySet();
     }
 
 }
