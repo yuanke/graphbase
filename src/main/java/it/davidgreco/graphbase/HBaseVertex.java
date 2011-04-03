@@ -178,7 +178,8 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             byte[] bvalue = Util.typedObjectToBytes(value);
             Put put = new Put(id);
             put.add(Bytes.toBytes(graph.handle.vnameProperties), Bytes.toBytes(key), bvalue);
-            graph.handle.vtable.put(put);
+
+            //Automatic indees update
             List<Index> elementIndexes = graph.indices.get(HBaseHelper.elementClass);
             List<Index> vectorIndexes = graph.indices.get(HBaseHelper.vertexClass);
             for (Index e : elementIndexes) {
@@ -187,6 +188,8 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             for (Index e : vectorIndexes) {
                 e.put(key, value, this);
             }
+            //
+            graph.handle.vtable.put(put);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -202,8 +205,9 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
                 return null;
             Delete delete = new Delete(get.getRow());
             delete.deleteColumns(Bytes.toBytes(graph.handle.vnameProperties), Bytes.toBytes(key));
-            graph.handle.vtable.delete(delete);
             Object value = Util.bytesToTypedObject(bvalue);
+
+            //Automatic indees update
             List<Index> elementIndexes = graph.indices.get(HBaseHelper.elementClass);
             List<Index> vectorIndexes = graph.indices.get(HBaseHelper.vertexClass);
             for (Index e : elementIndexes) {
@@ -212,6 +216,8 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             for (Index e : vectorIndexes) {
                 e.remove(key, value, this);
             }
+            //
+            graph.handle.vtable.delete(delete);
             return value;
         } catch (IOException e) {
             throw new RuntimeException(e);
