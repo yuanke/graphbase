@@ -11,7 +11,9 @@ import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HBaseHelper {
@@ -193,7 +195,7 @@ public class HBaseHelper {
     }
 
     static class IndexTableStruct {
-        short  indexClass;
+        short indexClass;
         String indexColumnName;
         HTable indexTable;
     }
