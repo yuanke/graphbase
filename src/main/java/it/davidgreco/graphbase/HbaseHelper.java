@@ -20,24 +20,26 @@ public class HBaseHelper {
     final String vname;
     final String ivname;
     final String ivnameProperties;
-    final String iename;
-    final String ienameProperties;
+    final String ivnameClass;
     final String vnameProperties;
     final String vnameOutEdges;
     final String vnameInEdges;
     final String vnameEdgeProperties;
     final String indexSepString = "-";
+
+    static final short elementClass = 0;
+    static final short vertexClass = 1;
+    static final short edgeClass = 2;
+
     HTable vtable;
     HTable ivtable;
-    HTable ietable;
 
     HBaseHelper(HBaseAdmin admin, String name) {
         this.admin = admin;
         this.vname = name;
-        this.ivname = name + "vertex_indexes";
+        this.ivname = name + "_indexes";
         this.ivnameProperties = ivname + "_properties";
-        this.iename = name + "edge_indexes";
-        this.ienameProperties = iename + "_properties";
+        this.ivnameClass = ivname + "_class";
         this.vnameProperties = vname + "_properties";
         this.vnameOutEdges = vname + "_outEdges";
         this.vnameInEdges = vname + "_inEdges";
@@ -58,17 +60,10 @@ public class HBaseHelper {
                 admin.createTable(new HTableDescriptor(ivname));
                 admin.disableTable(ivname);
                 admin.addColumn(ivname, new HColumnDescriptor(ivnameProperties));
+                admin.addColumn(ivname, new HColumnDescriptor(ivnameClass));
                 admin.enableTable(ivname);
             }
             this.ivtable = new HTable(admin.getConfiguration(), ivname);
-
-            if (!admin.tableExists(iename)) {
-                admin.createTable(new HTableDescriptor(iename));
-                admin.disableTable(iename);
-                admin.addColumn(iename, new HColumnDescriptor(ienameProperties));
-                admin.enableTable(iename);
-            }
-            this.ietable = new HTable(admin.getConfiguration(), iename);
         } catch (MasterNotRunningException e) {
             throw new RuntimeException(e);
         } catch (ZooKeeperConnectionException e) {
@@ -78,82 +73,66 @@ public class HBaseHelper {
         }
     }
 
-    <T extends Element> String getIndexTableColumnName(String name, Class<T> indexClass, String key) {
-        if (indexClass.equals(Vertex.class)) {
-            return "vertex" + indexSepString + name + indexSepString + key + indexSepString + "indexes";
-        }
-        if (indexClass.equals(Edge.class)) {
-            return "edge" + indexSepString + name + indexSepString + key + indexSepString + "indexes";
-        }
-        return null;
+    <T extends Element> String getIndexTableColumnName(String name, String key) {
+        return "index" + indexSepString + name + indexSepString + key + indexSepString + "indexes";
     }
 
-    <T extends Element> ConcurrentHashMap<String, IndexTableStruct> createAutomaticIndexTables(String name, Class<T> indexClass, Set<String> keys) {
-        ConcurrentHashMap indexTables = new ConcurrentHashMap<String, HTable>();
-        try {
-            if (indexClass.equals(Vertex.class)) {
-                Get vget = new Get(Bytes.toBytes(name));
-                Result vresult = ivtable.get(vget);
-                if (!vresult.isEmpty()) {
-                    throw new RuntimeException("An index with this name already exists");
-                }
-                Get eget = new Get(Bytes.toBytes(name));
-                Result eresult = ietable.get(eget);
-                if (!eresult.isEmpty()) {
-                    throw new RuntimeException("An index with this name already exists");
-                }
-                Put put = new Put(Bytes.toBytes(name));
-                for (String key : keys) {
-                    String tname = "vertex" + indexSepString + name + indexSepString + key;
-                    put.add(Bytes.toBytes(ivnameProperties), Bytes.toBytes(key), Bytes.toBytes(tname));
-                    String tcolname = getIndexTableColumnName(name, indexClass, key);
-                    if (!admin.tableExists(tname)) {
-                        admin.createTable(new HTableDescriptor(tname));
-                        admin.disableTable(tname);
-                        admin.addColumn(tname, new HColumnDescriptor(tcolname));
-                        admin.enableTable(tname);
-                    } else {
-                        throw new RuntimeException("Internal error"); //todo better error message
-                    }
-                    IndexTableStruct struct = new IndexTableStruct();
-                    struct.indexColumnName = tcolname;
-                    struct.indexTable = new HTable(admin.getConfiguration(), tname);
-                    indexTables.put(key, struct);
-                }
-                ivtable.put(put);
-            } else if (indexClass.equals(Edge.class)) {
-                Get vget = new Get(Bytes.toBytes(name));
-                Result vresult = ivtable.get(vget);
-                if (!vresult.isEmpty()) {
-                    throw new RuntimeException("An index with this name already exists");
-                }
-                Get eget = new Get(Bytes.toBytes(name));
-                Result eresult = ietable.get(eget);
-                if (!eresult.isEmpty()) {
-                    throw new RuntimeException("An index with this name already exists");
-                }
-                Put put = new Put(Bytes.toBytes(name));
-                for (String key : keys) {
-                    String tname = "edge" + indexSepString + name + indexSepString + key;
-                    put.add(Bytes.toBytes(ienameProperties), Bytes.toBytes(key), Bytes.toBytes(tname));
-                    String tcolname = getIndexTableColumnName(name, indexClass, key);
-                    if (!admin.tableExists(tname)) {
-                        admin.createTable(new HTableDescriptor(tname));
-                        admin.disableTable(tname);
-                        admin.addColumn(tname, new HColumnDescriptor(tcolname));
-                        admin.enableTable(tname);
-                    } else {
-                        throw new RuntimeException("Internal error"); //todo better error message
-                    }
-                    IndexTableStruct struct = new IndexTableStruct();
-                    struct.indexColumnName = tcolname;
-                    struct.indexTable = new HTable(admin.getConfiguration(), tname);
-                    indexTables.put(key, struct);
-                }
-                ietable.put(put);
-            } else {
+    <T extends Element> short getClass(Class<T> indexClass) {
+        if (indexClass.equals(Element.class)) {
+            return elementClass;
+        } else if (indexClass.equals(Vertex.class)) {
+            return vertexClass;
+        } else if (indexClass.equals(Edge.class)) {
+            return edgeClass;
+        } else {
+            throw new RuntimeException("indexClass not supported");
+        }
+
+    }
+
+    <T extends Element> Class<T> getClass(short ic) {
+        switch (ic) {
+            case elementClass:
+                return (Class<T>) Element.class;
+            case vertexClass:
+                return (Class<T>) Vertex.class;
+            case edgeClass:
+                return (Class<T>) Edge.class;
+            default:
                 throw new RuntimeException("indexClass not supported");
+        }
+    }
+
+
+    <T extends Element> ConcurrentHashMap<String, IndexTableStruct> createAutomaticIndexTables(String name, Class<T> indexClass, Set<String> keys) {
+        ConcurrentHashMap<String, IndexTableStruct> indexTables = new ConcurrentHashMap<String, IndexTableStruct>();
+        try {
+            Get vget = new Get(Bytes.toBytes(name));
+            Result vresult = ivtable.get(vget);
+            if (!vresult.isEmpty()) {
+                throw new RuntimeException("An index with this name already exists");
             }
+            Put put = new Put(Bytes.toBytes(name));
+            for (String key : keys) {
+                String tname = "index" + indexSepString + name + indexSepString + key;
+                put.add(Bytes.toBytes(ivnameProperties), Bytes.toBytes(key), Bytes.toBytes(tname));
+                put.add(Bytes.toBytes(ivnameClass), null, Bytes.toBytes(getClass(indexClass)));
+                String tcolname = getIndexTableColumnName(name, key);
+                if (!admin.tableExists(tname)) {
+                    admin.createTable(new HTableDescriptor(tname));
+                    admin.disableTable(tname);
+                    admin.addColumn(tname, new HColumnDescriptor(tcolname));
+                    admin.enableTable(tname);
+                } else {
+                    throw new RuntimeException("Internal error"); //todo better error message
+                }
+                IndexTableStruct struct = new IndexTableStruct();
+                struct.indexClass = getClass(indexClass);
+                struct.indexColumnName = tcolname;
+                struct.indexTable = new HTable(admin.getConfiguration(), tname);
+                indexTables.put(key, struct);
+            }
+            ivtable.put(put);
             return indexTables;
         } catch (MasterNotRunningException e) {
             throw new RuntimeException(e);
@@ -165,42 +144,23 @@ public class HBaseHelper {
     }
 
     <T extends Element> ConcurrentHashMap<String, IndexTableStruct> getAutomaticIndexTables(String name, Class<T> indexClass) {
-        ConcurrentHashMap indexTables = new ConcurrentHashMap<String, HTable>();
+        ConcurrentHashMap<String, IndexTableStruct> indexTables = new ConcurrentHashMap<String, IndexTableStruct>();
         try {
-            if (indexClass.equals(Vertex.class)) {
-                Get get = new Get(Bytes.toBytes(name));
-                Result result = ivtable.get(get);
-                if (result.isEmpty()) {
-                    throw new RuntimeException("An index with this name does not exist");
-                }
-                NavigableMap<byte[], byte[]> familyMap = result.getFamilyMap(Bytes.toBytes(ivnameProperties));
-                Set<Map.Entry<byte[], byte[]>> entrySet = familyMap.entrySet();
-                for (Map.Entry<byte[], byte[]> e : entrySet) {
-                    String key = Bytes.toString(e.getKey());
-                    String tname = Bytes.toString(e.getValue());
-                    IndexTableStruct struct = new IndexTableStruct();
-                    struct.indexColumnName = getIndexTableColumnName(name, indexClass, key);
-                    struct.indexTable = new HTable(admin.getConfiguration(), tname);
-                    indexTables.put(key, struct);
-                }
-            } else if (indexClass.equals(Edge.class)) {
-                Get get = new Get(Bytes.toBytes(name));
-                Result result = ietable.get(get);
-                if (result.isEmpty()) {
-                    throw new RuntimeException("An index with this name does not exist");
-                }
-                NavigableMap<byte[], byte[]> familyMap = result.getFamilyMap(Bytes.toBytes(ienameProperties));
-                Set<Map.Entry<byte[], byte[]>> entrySet = familyMap.entrySet();
-                for (Map.Entry<byte[], byte[]> e : entrySet) {
-                    String key = Bytes.toString(e.getKey());
-                    String tname = Bytes.toString(e.getValue());
-                    IndexTableStruct struct = new IndexTableStruct();
-                    struct.indexColumnName = getIndexTableColumnName(name, indexClass, key);
-                    struct.indexTable = new HTable(admin.getConfiguration(), tname);
-                    indexTables.put(key, struct);
-                }
-            } else {
-                throw new RuntimeException("indexClass not supported");
+            Get get = new Get(Bytes.toBytes(name));
+            Result result = ivtable.get(get);
+            if (result.isEmpty()) {
+                throw new RuntimeException("An index with this name does not exist");
+            }
+            NavigableMap<byte[], byte[]> familyMap = result.getFamilyMap(Bytes.toBytes(ivnameProperties));
+            Set<Map.Entry<byte[], byte[]>> entrySet = familyMap.entrySet();
+            for (Map.Entry<byte[], byte[]> e : entrySet) {
+                String key = Bytes.toString(e.getKey());
+                String tname = Bytes.toString(e.getValue());
+                IndexTableStruct struct = new IndexTableStruct();
+                struct.indexClass = getClass(indexClass);
+                struct.indexColumnName = getIndexTableColumnName(name, key);
+                struct.indexTable = new HTable(admin.getConfiguration(), tname);
+                indexTables.put(key, struct);
             }
             return indexTables;
         } catch (MasterNotRunningException e) {
@@ -216,8 +176,6 @@ public class HBaseHelper {
         try {
             Get vget = new Get(Bytes.toBytes(name));
             Result vresult = ivtable.get(vget);
-            Get eget = new Get(Bytes.toBytes(name));
-            Result eresult = ietable.get(eget);
             if (!vresult.isEmpty()) {
                 NavigableMap<byte[], byte[]> familyMap = vresult.getFamilyMap(Bytes.toBytes(ivnameProperties));
                 Set<Map.Entry<byte[], byte[]>> entrySet = familyMap.entrySet();
@@ -228,26 +186,14 @@ public class HBaseHelper {
                 }
                 Delete del = new Delete(vget.getRow());
                 ivtable.delete(del);
-            } else if (!eresult.isEmpty()) {
-                NavigableMap<byte[], byte[]> familyMap = eresult.getFamilyMap(Bytes.toBytes(ivnameProperties));
-                Set<Map.Entry<byte[], byte[]>> entrySet = familyMap.entrySet();
-                for (Map.Entry<byte[], byte[]> e : entrySet) {
-                    String tname = Bytes.toString(e.getValue());
-                    admin.disableTable(tname);
-                    admin.deleteTable(tname);
-                }
-                Delete del = new Delete(eget.getRow());
-                ietable.delete(del);
-            } else {
-                throw new RuntimeException("This index does not exist");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     static class IndexTableStruct {
+        short  indexClass;
         String indexColumnName;
         HTable indexTable;
     }
