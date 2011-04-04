@@ -1,5 +1,6 @@
 package it.davidgreco.graphbase;
 
+import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.Vertex;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
@@ -8,19 +9,21 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeSet;
 
 public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
 
-    private HBaseHelper handle;
+    private HBaseGraph graph;
     private byte[] id;
     private HBaseVertex outVertex;
     private HBaseVertex inVertex;
     private String label;
 
-    HBaseEdge() {
+    HBaseEdge(HBaseGraph graph) {
+        this.graph = graph;
     }
 
     @Override
@@ -43,8 +46,8 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
         try {
             Util.EdgeIdStruct struct = Util.getEdgeIdStruct(id);
             Get get = new Get(struct.vertexId);
-            Result result = handle.vtable.get(get);
-            byte[] bvalue = result.getValue(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId));
+            Result result = graph.handle.vtable.get(get);
+            byte[] bvalue = result.getValue(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId));
             if (bvalue == null)
                 return null;
             return Util.bytesToTypedObject(bvalue);
@@ -58,8 +61,8 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
         try {
             Util.EdgeIdStruct struct = Util.getEdgeIdStruct(id);
             Get get = new Get(struct.vertexId);
-            Result result = handle.vtable.get(get);
-            NavigableMap<byte[], byte[]> familyMap = result.getFamilyMap(Bytes.toBytes(handle.vnameEdgeProperties));
+            Result result = graph.handle.vtable.get(get);
+            NavigableMap<byte[], byte[]> familyMap = result.getFamilyMap(Bytes.toBytes(graph.handle.vnameEdgeProperties));
             Set<String> keys = new TreeSet<String>();
             Set<byte[]> bkeys = familyMap.keySet();
             for (byte[] bkey : bkeys) {
@@ -82,8 +85,19 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
             byte[] bvalue = Util.typedObjectToBytes(value);
             Util.EdgeIdStruct struct = Util.getEdgeIdStruct(id);
             Put put = new Put(struct.vertexId);
-            put.add(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId), bvalue);
-            handle.vtable.put(put);
+            put.add(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId), bvalue);
+
+            //Automatic indees update
+            List<Index> elementIndexes = graph.indices.get(HBaseHelper.elementClass);
+            List<Index> vectorIndexes = graph.indices.get(HBaseHelper.edgeClass);
+            for (Index e : elementIndexes) {
+                e.put(key, value, this);
+            }
+            for (Index e : vectorIndexes) {
+                e.put(key, value, this);
+            }
+            //
+            graph.handle.vtable.put(put);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -94,14 +108,26 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
         try {
             Util.EdgeIdStruct struct = Util.getEdgeIdStruct(id);
             Get get = new Get(struct.vertexId);
-            Result result = handle.vtable.get(get);
-            byte[] bvalue = result.getValue(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId));
+            Result result = graph.handle.vtable.get(get);
+            byte[] bvalue = result.getValue(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId));
             if (bvalue == null)
                 return null;
             Delete delete = new Delete(get.getRow());
-            delete.deleteColumns(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId));
-            handle.vtable.delete(delete);
-            return Util.bytesToTypedObject(bvalue);
+            delete.deleteColumns(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId));
+            Object value = Util.bytesToTypedObject(bvalue);
+
+            //Automatic indees update
+            List<Index> elementIndexes = graph.indices.get(HBaseHelper.elementClass);
+            List<Index> vectorIndexes = graph.indices.get(HBaseHelper.vertexClass);
+            for (Index e : elementIndexes) {
+                e.remove(key, value, this);
+            }
+            for (Index e : vectorIndexes) {
+                e.remove(key, value, this);
+            }
+            //
+            graph.handle.vtable.delete(delete);
+            return value;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -126,10 +152,6 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
 
     void setLabel(String label) {
         this.label = label;
-    }
-
-    void setHandle(HBaseHelper handle) {
-        this.handle = handle;
     }
 
 }

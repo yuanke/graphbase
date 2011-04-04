@@ -29,7 +29,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(graph.handle.vnameOutEdges)).entrySet();
             List<Edge> outEdges = new ArrayList<Edge>();
             for (Map.Entry<byte[], byte[]> e : set) {
-                HBaseEdge edge = new HBaseEdge();
+                HBaseEdge edge = new HBaseEdge(graph);
                 edge.setId(Util.generateEdgeId(id, e.getKey()));
                 edge.setOutVertex(this);
                 HBaseVertex inVertex = new HBaseVertex();
@@ -38,7 +38,6 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
                 edge.setInVertex(inVertex);
                 String label = Bytes.toString(result.getValue(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId("label", e.getKey())));
                 edge.setLabel(label);
-                edge.setHandle(graph.handle);
                 outEdges.add(edge);
             }
             return outEdges;
@@ -58,7 +57,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             List<Edge> inEdges = new ArrayList<Edge>();
             for (Map.Entry<byte[], byte[]> e : set) {
                 Util.EdgeIdStruct struct = Util.getEdgeIdStruct(e.getValue());
-                HBaseEdge edge = new HBaseEdge();
+                HBaseEdge edge = new HBaseEdge(graph);
                 edge.setId(e.getValue());
                 edge.setInVertex(this);
                 HBaseVertex outVertex = new HBaseVertex();
@@ -68,7 +67,6 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
                 Result outResult = graph.handle.vtable.get(outGet);
                 String label = Bytes.toString(outResult.getValue(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId("label", e.getKey())));
                 edge.setLabel(label);
-                edge.setHandle(graph.handle);
                 inEdges.add(edge);
             }
             return inEdges;
@@ -85,9 +83,9 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             if (result.isEmpty())
                 return null;
             Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(graph.handle.vnameOutEdges)).entrySet();
-            List outEdges = new ArrayList();
+            List<Edge> outEdges = new ArrayList<Edge>();
             for (Map.Entry<byte[], byte[]> e : set) {
-                HBaseEdge edge = new HBaseEdge();
+                HBaseEdge edge = new HBaseEdge(graph);
                 edge.setId(Util.generateEdgeId(id, e.getKey()));
                 edge.setOutVertex(this);
                 HBaseVertex inVertex = new HBaseVertex();
@@ -96,7 +94,6 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
                 edge.setInVertex(inVertex);
                 String l = Bytes.toString(result.getValue(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId("label", e.getKey())));
                 edge.setLabel(l);
-                edge.setHandle(graph.handle);
                 if (l.equals(label)) {
                     outEdges.add(edge);
                 }
@@ -115,10 +112,10 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             if (result.isEmpty())
                 return null;
             Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(graph.handle.vnameInEdges)).entrySet();
-            List inEdges = new ArrayList<Edge>();
+            List<Edge> inEdges = new ArrayList<Edge>();
             for (Map.Entry<byte[], byte[]> e : set) {
                 Util.EdgeIdStruct struct = Util.getEdgeIdStruct(e.getValue());
-                HBaseEdge edge = new HBaseEdge();
+                HBaseEdge edge = new HBaseEdge(this.graph);
                 edge.setId(e.getValue());
                 edge.setInVertex(this);
                 HBaseVertex outVertex = new HBaseVertex();
@@ -128,7 +125,6 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
                 Result outResult = graph.handle.vtable.get(outGet);
                 String l = Bytes.toString(outResult.getValue(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId("label", e.getKey())));
                 edge.setLabel(l);
-                edge.setHandle(graph.handle);
                 if (l.equals(label)) {
                     inEdges.add(edge);
                 }

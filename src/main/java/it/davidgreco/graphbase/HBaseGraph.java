@@ -97,12 +97,11 @@ public class HBaseGraph implements Graph, IndexableGraph {
                 inPut.add(Bytes.toBytes(handle.vnameInEdges), edgeLocalId, edgeId);
                 handle.vtable.put(inPut);
 
-                HBaseEdge edge = new HBaseEdge();
+                HBaseEdge edge = new HBaseEdge(this);
                 edge.setId(edgeId);
                 edge.setOutVertex((HBaseVertex) outVertex);
                 edge.setInVertex((HBaseVertex) inVertex);
                 edge.setLabel(label);
-                edge.setHandle(handle);
                 return edge;
             } else {
                 throw new RuntimeException("One or both vertexes don't exist");
@@ -134,7 +133,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
             byte[] outVertexId = struct.vertexId;
 
-            Get g = new Get((byte[]) struct.vertexId);
+            Get g = new Get(struct.vertexId);
             Result result = handle.vtable.get(g);
             if (result.isEmpty())
                 return null;
@@ -147,7 +146,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
             String label = Bytes.toString(result.getValue(Bytes.toBytes(handle.vnameEdgeProperties), Util.generateEdgePropertyId("label", struct.edgeLocalId)));
 
-            HBaseEdge edge = new HBaseEdge();
+            HBaseEdge edge = new HBaseEdge(this);
             HBaseVertex outVertex = new HBaseVertex();
             outVertex.setId(outVertexId);
             HBaseVertex inVertex = new HBaseVertex();
@@ -156,7 +155,6 @@ public class HBaseGraph implements Graph, IndexableGraph {
             edge.setInVertex(inVertex);
             edge.setOutVertex(outVertex);
             edge.setLabel(label);
-            edge.setHandle(handle);
             return edge;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -218,7 +216,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
     @Override
     public <T extends Element> AutomaticIndex<T> createAutomaticIndex(String indexName, Class<T> indexClass, Set<String> keys) {
         ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables = handle.createAutomaticIndexTables(indexName, indexClass, keys);
-        HBaseIndex index = new HBaseIndex(this, indexName, indexClass, indexTables);
+        HBaseIndex<T> index = new HBaseIndex<T>(this, indexName, indexClass, indexTables);
         indices.get(handle.getClass(indexClass)).add(index);
         return index;
     }
@@ -226,7 +224,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
     @Override
     public <T extends Element> Index<T> getIndex(String indexName, Class<T> indexClass) {
         ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables = handle.getAutomaticIndexTables(indexName, indexClass);
-        HBaseIndex index = new HBaseIndex(this, indexName, indexClass, indexTables);
+        HBaseIndex<T> index = new HBaseIndex<T>(this, indexName, indexClass, indexTables);
         indices.get(handle.getClass(indexClass)).add(index);
         return index;
     }
