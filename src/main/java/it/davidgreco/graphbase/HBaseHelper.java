@@ -75,21 +75,28 @@ public class HBaseHelper {
         }
     }
 
-    <T extends Element> String getIndexTableColumnName(String name, String key) {
+    String getIndexTableName(String name, String key) {
+        return "index" + indexSepString + name + indexSepString + key;
+    }
+
+    String getIndexTableColumnNameIndexes(String name, String key) {
         return "index" + indexSepString + name + indexSepString + key + indexSepString + "indexes";
+    }
+
+    String getIndexTableColumnNameClass(String name, String key) {
+        return "index" + indexSepString + name + indexSepString + key + indexSepString + "class";
     }
 
     <T extends Element> short getClass(Class<T> indexClass) {
         if (indexClass.equals(Element.class)) {
             return elementClass;
-        } else if (indexClass.equals(Vertex.class)) {
+        } else if (Vertex.class.isAssignableFrom(indexClass)) {
             return vertexClass;
-        } else if (indexClass.equals(Edge.class)) {
+        } else if (Edge.class.isAssignableFrom(indexClass)) {
             return edgeClass;
         } else {
             throw new RuntimeException("indexClass not supported");
         }
-
     }
 
     <T extends Element> Class<T> getClass(short ic) {
@@ -116,22 +123,26 @@ public class HBaseHelper {
             }
             Put put = new Put(Bytes.toBytes(name));
             for (String key : keys) {
-                String tname = "index" + indexSepString + name + indexSepString + key;
-                put.add(Bytes.toBytes(ivnameProperties), Bytes.toBytes(key), Bytes.toBytes(tname));
-                put.add(Bytes.toBytes(ivnameClass), null, Bytes.toBytes(getClass(indexClass)));
-                String tcolname = getIndexTableColumnName(name, key);
+                String tname = getIndexTableName(name, key);
+                String tcolnameIndexes = getIndexTableColumnNameIndexes(name, key);
+                String tcolnameClass = getIndexTableColumnNameClass(name, key);
                 if (!admin.tableExists(tname)) {
                     admin.createTable(new HTableDescriptor(tname));
                     admin.disableTable(tname);
-                    admin.addColumn(tname, new HColumnDescriptor(tcolname));
+                    admin.addColumn(tname, new HColumnDescriptor(tcolnameIndexes));
+                    admin.addColumn(tname, new HColumnDescriptor(tcolnameClass));
                     admin.enableTable(tname);
                 } else {
                     throw new RuntimeException("Internal error"); //todo better error message
                 }
                 IndexTableStruct struct = new IndexTableStruct();
                 struct.indexClass = getClass(indexClass);
-                struct.indexColumnName = tcolname;
+                struct.indexColumnNameIndexes = tcolnameIndexes;
+                struct.indexColumnNameClass = tcolnameClass;
                 struct.indexTable = new HTable(admin.getConfiguration(), tname);
+
+                put.add(Bytes.toBytes(ivnameProperties), Bytes.toBytes(key), Bytes.toBytes(tname));
+                put.add(Bytes.toBytes(ivnameClass), null, Bytes.toBytes(getClass(indexClass)));
                 indexTables.put(key, struct);
             }
             ivtable.put(put);
@@ -160,7 +171,8 @@ public class HBaseHelper {
                 String tname = Bytes.toString(e.getValue());
                 IndexTableStruct struct = new IndexTableStruct();
                 struct.indexClass = getClass(indexClass);
-                struct.indexColumnName = getIndexTableColumnName(name, key);
+                struct.indexColumnNameIndexes = getIndexTableColumnNameIndexes(name, key);
+                struct.indexColumnNameClass = getIndexTableColumnNameClass(name, key);
                 struct.indexTable = new HTable(admin.getConfiguration(), tname);
                 indexTables.put(key, struct);
             }
@@ -196,7 +208,8 @@ public class HBaseHelper {
 
     static class IndexTableStruct {
         short indexClass;
-        String indexColumnName;
+        String indexColumnNameIndexes;
+        String indexColumnNameClass;
         HTable indexTable;
     }
 

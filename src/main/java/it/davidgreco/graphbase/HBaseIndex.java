@@ -48,10 +48,11 @@ public class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
         try {
             HBaseHelper.IndexTableStruct struct = indexTables.get(key);
             if (struct == null) {
-                throw new RuntimeException("Something went wrong"); //todo better error message
+                return;
             }
             Put put = new Put(Util.typedObjectToBytes(value));
-            put.add(Bytes.toBytes(struct.indexColumnName), (byte[]) element.getId(), (byte[]) element.getId());
+            put.add(Bytes.toBytes(struct.indexColumnNameIndexes), (byte[]) element.getId(), (byte[]) element.getId());
+            put.add(Bytes.toBytes(struct.indexColumnNameClass), null, Bytes.toBytes(graph.handle.getClass(element.getClass())));
             struct.indexTable.put(put);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -69,13 +70,22 @@ public class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
             Get get = new Get(Util.typedObjectToBytes(value));
             Result result = struct.indexTable.get(get);
             if (!result.isEmpty()) {
-                Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(graph.handle.getIndexTableColumnName(name, key))).entrySet();
+                Set<Map.Entry<byte[], byte[]>> set = result.getFamilyMap(Bytes.toBytes(struct.indexColumnNameIndexes)).entrySet();
                 for (Map.Entry<byte[], byte[]> e : set) {
                     if (indexClass.equals(Vertex.class)) {
                         elements.add((T) graph.getVertex(e.getValue()));
                     }
                     if (indexClass.equals((Edge.class))) {
                         elements.add((T) graph.getEdge(e.getValue()));
+                    }
+                    if (indexClass.equals(Element.class)) {
+                        Class<T> actualClass = graph.handle.getClass(Bytes.toShort(result.getValue(Bytes.toBytes(struct.indexColumnNameClass), null)));
+                        if (actualClass.equals(Vertex.class)) {
+                            elements.add((T) graph.getVertex(e.getValue()));
+                        }
+                        if (actualClass.equals((Edge.class))) {
+                            elements.add((T) graph.getEdge(e.getValue()));
+                        }
                     }
                 }
             }
@@ -93,7 +103,8 @@ public class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
                 throw new RuntimeException("Something went wrong"); //todo better error message
             }
             Delete del = new Delete(Util.typedObjectToBytes(value));
-            del.deleteColumns(Bytes.toBytes(struct.indexColumnName), (byte[]) element.getId());
+            del.deleteColumns(Bytes.toBytes(struct.indexColumnNameIndexes), (byte[]) element.getId());
+            del.deleteColumns(Bytes.toBytes(struct.indexColumnNameClass), null);
             struct.indexTable.delete(del);
         } catch (IOException e) {
             throw new RuntimeException(e);

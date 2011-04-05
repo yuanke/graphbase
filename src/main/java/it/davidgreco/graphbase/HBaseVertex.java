@@ -173,13 +173,8 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             Put put = new Put(id);
             put.add(Bytes.toBytes(graph.handle.vnameProperties), Bytes.toBytes(key), bvalue);
 
-            //Automatic indees update
-            List<Index> elementIndexes = graph.indices.get(HBaseHelper.elementClass);
-            List<Index> vectorIndexes = graph.indices.get(HBaseHelper.vertexClass);
-            for (Index e : elementIndexes) {
-                e.put(key, value, this);
-            }
-            for (Index e : vectorIndexes) {
+            //Automatic indices update
+            for (Index e : graph.indices) {
                 e.put(key, value, this);
             }
             //
@@ -202,12 +197,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             Object value = Util.bytesToTypedObject(bvalue);
 
             //Automatic indees update
-            List<Index> elementIndexes = graph.indices.get(HBaseHelper.elementClass);
-            List<Index> vectorIndexes = graph.indices.get(HBaseHelper.vertexClass);
-            for (Index e : elementIndexes) {
-                e.remove(key, value, this);
-            }
-            for (Index e : vectorIndexes) {
+            for (Index e : graph.indices) {
                 e.remove(key, value, this);
             }
             //

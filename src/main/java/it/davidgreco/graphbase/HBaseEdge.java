@@ -87,13 +87,8 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
             Put put = new Put(struct.vertexId);
             put.add(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId), bvalue);
 
-            //Automatic indees update
-            List<Index> elementIndexes = graph.indices.get(HBaseHelper.elementClass);
-            List<Index> vectorIndexes = graph.indices.get(HBaseHelper.edgeClass);
-            for (Index e : elementIndexes) {
-                e.put(key, value, this);
-            }
-            for (Index e : vectorIndexes) {
+            //Automatic indices update
+            for (Index e : graph.indices) {
                 e.put(key, value, this);
             }
             //
@@ -116,13 +111,8 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
             delete.deleteColumns(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId));
             Object value = Util.bytesToTypedObject(bvalue);
 
-            //Automatic indees update
-            List<Index> elementIndexes = graph.indices.get(HBaseHelper.elementClass);
-            List<Index> vectorIndexes = graph.indices.get(HBaseHelper.vertexClass);
-            for (Index e : elementIndexes) {
-                e.remove(key, value, this);
-            }
-            for (Index e : vectorIndexes) {
+            //Automatic indices update
+            for (Index e : graph.indices) {
                 e.remove(key, value, this);
             }
             //
