@@ -23,6 +23,8 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
 
       val i1 = graph.createAutomaticIndex("idx1", classOf[Vertex], Set("FirstName", "FamilyName"))
       val indexes1 = graph.getIndices
+      val i1n = graph.getIndex("idx1", classOf[Vertex])
+
       assert(indexes1.size == 1)
 
       graph.dropIndex("idx1")
@@ -39,13 +41,14 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
       val graph: IndexableGraph = new HBaseGraph(admin, "simple")
 
       val i1 = graph.createAutomaticIndex("idx1", classOf[Vertex], Set("FirstName", "FamilyName"))
+      val i1n = graph.getIndex("idx1", classOf[Vertex])
 
       val v1 = graph.addVertex(null)
       v1.setProperty("FirstName", "David")
       v1.setProperty("FamilyName", "Greco")
 
-      val v1n1 = i1.get("FirstName", "David")
-      val v1n2 = i1.get("FamilyName", "Greco")
+      val v1n1 = i1n.get("FirstName", "David")
+      val v1n2 = i1n.get("FamilyName", "Greco")
       assert(v1n1.size == 1)
       assert(v1n2.size == 1)
       assert(toString(v1n1.toBuffer.apply(0).getId) == toString(v1n2.toBuffer.apply(0).getId))
@@ -59,6 +62,7 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
       val graph: IndexableGraph = new HBaseGraph(admin, "simple")
 
       val i1 = graph.createAutomaticIndex("idx2", classOf[Edge], Set("Prop1", "Prop2"))
+      val i1n = graph.getIndex("idx2", classOf[Edge])
 
       val v1 = graph.addVertex(null)
       val v2 = graph.addVertex(null)
@@ -66,8 +70,8 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
       e1.setProperty("Prop1", "Val1")
       e1.setProperty("Prop2", "Val2")
 
-      val e1n1 = i1.get("Prop1", "Val1")
-      val e1n2 = i1.get("Prop2", "Val2")
+      val e1n1 = i1n.get("Prop1", "Val1")
+      val e1n2 = i1n.get("Prop2", "Val2")
       assert(e1n1.size == 1)
       assert(e1n2.size == 1)
       assert(toString(e1n1.toBuffer.apply(0).getId) == toString(e1n2.toBuffer.apply(0).getId))
