@@ -14,7 +14,7 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
+class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
 
     private HBaseGraph graph;
     private byte[] id;
@@ -80,6 +80,7 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void setProperty(String key, Object value) {
         try {
             byte[] bvalue = Util.typedObjectToBytes(value);
@@ -88,7 +89,7 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
             put.add(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId), bvalue);
 
             //Automatic indices update
-            for (Index e : graph.indices) {
+            for (Index e : graph.indices.values()) {
                 e.put(key, value, this);
             }
             //
@@ -99,6 +100,7 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object removeProperty(String key) {
         try {
             Util.EdgeIdStruct struct = Util.getEdgeIdStruct(id);
@@ -112,7 +114,7 @@ public class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
             Object value = Util.bytesToTypedObject(bvalue);
 
             //Automatic indices update
-            for (Index e : graph.indices) {
+            for (Index e : graph.indices.values()) {
                 e.remove(key, value, this);
             }
             //

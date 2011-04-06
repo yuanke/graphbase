@@ -11,7 +11,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import java.io.IOException;
 import java.util.*;
 
-public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
+class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
 
     private HBaseGraph graph;
     private byte[] id;
@@ -167,6 +167,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void setProperty(String key, Object value) {
         try {
             byte[] bvalue = Util.typedObjectToBytes(value);
@@ -174,7 +175,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             put.add(Bytes.toBytes(graph.handle.vnameProperties), Bytes.toBytes(key), bvalue);
 
             //Automatic indices update
-            for (Index e : graph.indices) {
+            for (Index e : graph.indices.values()) {
                 e.put(key, value, this);
             }
             //
@@ -185,6 +186,7 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object removeProperty(String key) {
         try {
             Get get = new Get(id);
@@ -196,8 +198,8 @@ public class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             delete.deleteColumns(Bytes.toBytes(graph.handle.vnameProperties), Bytes.toBytes(key));
             Object value = Util.bytesToTypedObject(bvalue);
 
-            //Automatic indees update
-            for (Index e : graph.indices) {
+            //Automatic indices update
+            for (Index e : graph.indices.values()) {
                 e.remove(key, value, this);
             }
             //

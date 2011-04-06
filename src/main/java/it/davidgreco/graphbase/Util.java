@@ -3,17 +3,17 @@ package it.davidgreco.graphbase;
 import com.eaio.uuid.UUID;
 import org.apache.hadoop.hbase.util.Bytes;
 
-public class Util {
+class Util {
 
-    final static byte bytearray_type = 0;
-    final static byte string_type = 1;
-    final static byte long_type = 2;
-    final static byte int_type = 3;
-    final static byte short_type = 4;
-    final static byte float_type = 5;
-    final static byte double_type = 6;
-    final static byte boolean_type = 7;
-    final static byte non_supported_type = 100;
+    private final static byte bytearray_type = 0;
+    private final static byte string_type = 1;
+    private final static byte long_type = 2;
+    private final static byte int_type = 3;
+    private final static byte short_type = 4;
+    private final static byte float_type = 5;
+    private final static byte double_type = 6;
+    private final static byte boolean_type = 7;
+    private final static byte non_supported_type = 100;
 
     static byte[] generateVertexId() {
         UUID rid = new UUID();
@@ -37,9 +37,7 @@ public class Util {
     static EdgeIdStruct getEdgeIdStruct(byte[] edgeId) {
         EdgeIdStruct struct = new EdgeIdStruct();
         struct.vertexId = Bytes.head(edgeId, 16);
-        ;
         struct.edgeLocalId = Bytes.tail(edgeId, 8);
-        ;
         return struct;
     }
 

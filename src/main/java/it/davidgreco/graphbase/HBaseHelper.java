@@ -1,6 +1,5 @@
 package it.davidgreco.graphbase;
 
-import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Element;
 import com.tinkerpop.blueprints.pgm.Vertex;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -16,22 +15,21 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HBaseHelper {
+class HBaseHelper {
 
-    final HBaseAdmin admin;
-    final String vname;
-    final String ivname;
-    final String ivnameProperties;
+    private final HBaseAdmin admin;
+    private final String vname;
+    private final String ivname;
     final String ivnameClass;
+    private final String ivnameProperties;
     final String vnameProperties;
     final String vnameOutEdges;
     final String vnameInEdges;
     final String vnameEdgeProperties;
-    final String indexSepString = "-";
 
-    static final short elementClass = 0;
-    static final short vertexClass = 1;
-    static final short edgeClass = 2;
+    private static final String separator = ".-.";
+    static final String vertexClass = "vertex";
+    static final String edgeClass = "edge";
 
     HTable vtable;
     HTable ivtable;
@@ -40,8 +38,8 @@ public class HBaseHelper {
         this.admin = admin;
         this.vname = name;
         this.ivname = name + "_indexes";
-        this.ivnameProperties = ivname + "_properties";
         this.ivnameClass = ivname + "_class";
+        this.ivnameProperties = ivname + "_properties";
         this.vnameProperties = vname + "_properties";
         this.vnameOutEdges = vname + "_outEdges";
         this.vnameInEdges = vname + "_inEdges";
@@ -61,8 +59,8 @@ public class HBaseHelper {
             if (!admin.tableExists(ivname)) {
                 admin.createTable(new HTableDescriptor(ivname));
                 admin.disableTable(ivname);
-                admin.addColumn(ivname, new HColumnDescriptor(ivnameProperties));
                 admin.addColumn(ivname, new HColumnDescriptor(ivnameClass));
+                admin.addColumn(ivname, new HColumnDescriptor(ivnameProperties));
                 admin.enableTable(ivname);
             }
             this.ivtable = new HTable(admin.getConfiguration(), ivname);
@@ -76,42 +74,12 @@ public class HBaseHelper {
     }
 
     String getIndexTableName(String name, String key) {
-        return "index" + indexSepString + name + indexSepString + key;
+        return "index" + separator + name + separator + key;
     }
 
     String getIndexTableColumnNameIndexes(String name, String key) {
-        return "index" + indexSepString + name + indexSepString + key + indexSepString + "indexes";
+        return "index" + separator + name + separator + key + separator + "indexes";
     }
-
-    String getIndexTableColumnNameClass(String name, String key) {
-        return "index" + indexSepString + name + indexSepString + key + indexSepString + "class";
-    }
-
-    <T extends Element> short getClass(Class<T> indexClass) {
-        if (indexClass.equals(Element.class)) {
-            return elementClass;
-        } else if (Vertex.class.isAssignableFrom(indexClass)) {
-            return vertexClass;
-        } else if (Edge.class.isAssignableFrom(indexClass)) {
-            return edgeClass;
-        } else {
-            throw new RuntimeException("indexClass not supported");
-        }
-    }
-
-    <T extends Element> Class<T> getClass(short ic) {
-        switch (ic) {
-            case elementClass:
-                return (Class<T>) Element.class;
-            case vertexClass:
-                return (Class<T>) Vertex.class;
-            case edgeClass:
-                return (Class<T>) Edge.class;
-            default:
-                throw new RuntimeException("indexClass not supported");
-        }
-    }
-
 
     <T extends Element> ConcurrentHashMap<String, IndexTableStruct> createAutomaticIndexTables(String name, Class<T> indexClass, Set<String> keys) {
         ConcurrentHashMap<String, IndexTableStruct> indexTables = new ConcurrentHashMap<String, IndexTableStruct>();
@@ -125,24 +93,24 @@ public class HBaseHelper {
             for (String key : keys) {
                 String tname = getIndexTableName(name, key);
                 String tcolnameIndexes = getIndexTableColumnNameIndexes(name, key);
-                String tcolnameClass = getIndexTableColumnNameClass(name, key);
                 if (!admin.tableExists(tname)) {
                     admin.createTable(new HTableDescriptor(tname));
                     admin.disableTable(tname);
                     admin.addColumn(tname, new HColumnDescriptor(tcolnameIndexes));
-                    admin.addColumn(tname, new HColumnDescriptor(tcolnameClass));
                     admin.enableTable(tname);
                 } else {
                     throw new RuntimeException("Internal error"); //todo better error message
                 }
                 IndexTableStruct struct = new IndexTableStruct();
-                struct.indexClass = getClass(indexClass);
                 struct.indexColumnNameIndexes = tcolnameIndexes;
-                struct.indexColumnNameClass = tcolnameClass;
                 struct.indexTable = new HTable(admin.getConfiguration(), tname);
-
+                String c;
+                if (Vertex.class.isAssignableFrom(indexClass))
+                    c = vertexClass;
+                else
+                    c = edgeClass;
+                put.add(Bytes.toBytes(ivnameClass), null, Bytes.toBytes(c));
                 put.add(Bytes.toBytes(ivnameProperties), Bytes.toBytes(key), Bytes.toBytes(tname));
-                put.add(Bytes.toBytes(ivnameClass), null, Bytes.toBytes(getClass(indexClass)));
                 indexTables.put(key, struct);
             }
             ivtable.put(put);
@@ -156,7 +124,7 @@ public class HBaseHelper {
         }
     }
 
-    <T extends Element> ConcurrentHashMap<String, IndexTableStruct> getAutomaticIndexTables(String name, Class<T> indexClass) {
+    <T extends Element> ConcurrentHashMap<String, IndexTableStruct> getAutomaticIndexTables(String name) {
         ConcurrentHashMap<String, IndexTableStruct> indexTables = new ConcurrentHashMap<String, IndexTableStruct>();
         try {
             Get get = new Get(Bytes.toBytes(name));
@@ -170,9 +138,7 @@ public class HBaseHelper {
                 String key = Bytes.toString(e.getKey());
                 String tname = Bytes.toString(e.getValue());
                 IndexTableStruct struct = new IndexTableStruct();
-                struct.indexClass = getClass(indexClass);
                 struct.indexColumnNameIndexes = getIndexTableColumnNameIndexes(name, key);
-                struct.indexColumnNameClass = getIndexTableColumnNameClass(name, key);
                 struct.indexTable = new HTable(admin.getConfiguration(), tname);
                 indexTables.put(key, struct);
             }
@@ -207,9 +173,7 @@ public class HBaseHelper {
     }
 
     static class IndexTableStruct {
-        short indexClass;
         String indexColumnNameIndexes;
-        String indexColumnNameClass;
         HTable indexTable;
     }
 

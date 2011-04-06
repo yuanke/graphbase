@@ -3,6 +3,8 @@ import sbt._
 
 class GraphBase(info: ProjectInfo) extends DefaultProject(info) {
 
+  override def javaCompileOptions = super.javaCompileOptions ++ javaCompileOptions("-Xlint:unchecked")
+
   val SunRepository = "Sun Repository" at "http://download.java.net/maven/2/"
   val TinkerPopRepository = "TinkerPop Repository" at "http://tinkerpop.com/maven2/"
   val ClouderaRepository = "Cloudera Repository" at "https://repository.cloudera.com/content/groups/cloudera-repos/"
