@@ -4,6 +4,7 @@ import sbt._
 class GraphBase(info: ProjectInfo) extends DefaultProject(info) {
 
   override def javaCompileOptions = super.javaCompileOptions ++ javaCompileOptions("-Xlint:unchecked")
+  override def disableCrossPaths = true
 
   val SunRepository = "Sun Repository" at "http://download.java.net/maven/2/"
   val TinkerPopRepository = "TinkerPop Repository" at "http://tinkerpop.com/maven2/"
