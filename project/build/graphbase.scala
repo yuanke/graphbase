@@ -28,6 +28,8 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
 
   // Repositories
   object Repositories {
+    val scalaToolsSnapshots = "Scala Tools Snapshots" at "http://scala-tools.org/repo-snapshots"
+    val scalaToolsReleases = "Scala Tools Releases" at "http://scala-tools.org/repo-releases"
     val SunRepository = "Sun Repository" at "http://download.java.net/maven/2/"
     val TinkerPopRepository = "TinkerPop Repository" at "http://tinkerpop.com/maven2/"
     val ClouderaRepository = "Cloudera Repository" at "https://repository.cloudera.com/content/groups/cloudera-repos/"
@@ -47,6 +49,7 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     val hbaseTest = "org.apache.hbase" % "hbase" % "0.90.1-CDH3B4" % "test" classifier "tests"
     val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
     val junit = "junit" % "junit" % "4.5" % "test"
+    val specs2 = "org.specs2" %% "specs2" % "1.1" % "test"
   }
 
   class GraphbaseProject(info: ProjectInfo) extends DefaultProject(info) {
@@ -61,7 +64,13 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
 
     override def defaultPublishRepository = Some(Resolver.file("Local", new File("../graphbase-pages/repository")))
 
+    def specs2Framework = new TestFramework("org.specs2.runner.SpecsFramework")
+
+    override def testFrameworks = super.testFrameworks ++ Seq(specs2Framework)
+
     // Repositories
+    lazy val scalaToolsSnapshots = Repositories.scalaToolsSnapshots
+    lazy val scalaToolsReleases = Repositories.scalaToolsReleases
     lazy val SunRepository = Repositories.SunRepository
     lazy val TinkerPopRepository = Repositories.TinkerPopRepository
     lazy val ClouderaRepository = Repositories.ClouderaRepository
@@ -83,6 +92,7 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     lazy val hbaseTest = Dependencies.hbaseTest
     lazy val scalatest = Dependencies.scalatest
     lazy val junit = Dependencies.junit
+    lazy val specs2 = Dependencies.specs2
 
     // Compile
     override def ivyXML =
@@ -160,6 +170,6 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
 
   // Subprojects
   lazy val blueprints = project("blueprints", "graphbase-blueprints", new BlueprintsProject(_))
-  lazy val dsl        = project("dsl", "graphbase-dsl", new DslProject(_), blueprints)
+  lazy val dsl = project("dsl", "graphbase-dsl", new DslProject(_), blueprints)
 
 }
