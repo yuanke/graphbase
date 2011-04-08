@@ -1,4 +1,4 @@
-package it.davidgreco.graphbase
+package it.davidgreco.graphbase.blueprints
 
 import scala.collection.JavaConversions._
 import org.scalatest.matchers.ShouldMatchers

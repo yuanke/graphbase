@@ -1,4 +1,4 @@
-package it.davidgreco.graphbase;
+package it.davidgreco.graphbase.blueprints;
 
 import com.tinkerpop.blueprints.pgm.Element;
 import com.tinkerpop.blueprints.pgm.Vertex;

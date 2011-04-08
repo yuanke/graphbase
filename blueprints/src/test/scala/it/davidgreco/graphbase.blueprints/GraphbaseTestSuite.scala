@@ -1,4 +1,4 @@
-package it.davidgreco.graphbase
+package it.davidgreco.graphbase.blueprints
 
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers

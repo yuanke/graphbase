@@ -1,4 +1,4 @@
-package it.davidgreco.graphbase;
+package it.davidgreco.graphbase.blueprints;
 
 import com.eaio.uuid.UUID;
 import org.apache.hadoop.hbase.util.Bytes;

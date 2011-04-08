@@ -1,4 +1,4 @@
-package it.davidgreco.graphbase;
+package it.davidgreco.graphbase.blueprints;
 
 import com.tinkerpop.blueprints.pgm.AutomaticIndex;
 import com.tinkerpop.blueprints.pgm.Element;
@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
 

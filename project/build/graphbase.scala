@@ -49,7 +49,6 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     val hbaseTest = "org.apache.hbase" % "hbase" % "0.90.1-CDH3B4" % "test" classifier "tests"
     val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
     val junit = "junit" % "junit" % "4.5" % "test"
-    val specs2 = "org.specs2" %% "specs2" % "1.1" % "test"
   }
 
   class GraphbaseProject(info: ProjectInfo) extends DefaultProject(info) {
@@ -63,10 +62,6 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     override def managedStyle = ManagedStyle.Maven
 
     override def defaultPublishRepository = Some(Resolver.file("Local", new File("../graphbase-pages/repository")))
-
-    def specs2Framework = new TestFramework("org.specs2.runner.SpecsFramework")
-
-    override def testFrameworks = super.testFrameworks ++ Seq(specs2Framework)
 
     // Repositories
     lazy val scalaToolsSnapshots = Repositories.scalaToolsSnapshots
@@ -92,7 +87,6 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     lazy val hbaseTest = Dependencies.hbaseTest
     lazy val scalatest = Dependencies.scalatest
     lazy val junit = Dependencies.junit
-    lazy val specs2 = Dependencies.specs2
 
     // Compile
     override def ivyXML =

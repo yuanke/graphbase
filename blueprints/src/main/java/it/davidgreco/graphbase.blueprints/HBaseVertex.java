@@ -1,4 +1,4 @@
-package it.davidgreco.graphbase;
+package it.davidgreco.graphbase.blueprints;
 
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;

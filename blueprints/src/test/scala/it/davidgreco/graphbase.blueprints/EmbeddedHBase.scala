@@ -1,4 +1,4 @@
-package it.davidgreco.graphbase
+package it.davidgreco.graphbase.blueprints
 
 import org.scalatest.{Suite, BeforeAndAfterAll}
 import org.apache.hadoop.hbase.HBaseTestingUtility
