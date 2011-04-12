@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-class HBaseGraph implements Graph, IndexableGraph {
+public class HBaseGraph implements Graph, IndexableGraph {
 
     final HBaseHelper        handle;
     final Map<String, Index> indices;

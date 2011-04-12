@@ -41,12 +41,12 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
   // Dependencies
   object Dependencies {
     // Compile
-    val tinkerpop = "com.tinkerpop" % "blueprints" % "0.5" intransitive
+    val tinkerpop = "com.tinkerpop.blueprints" % "blueprints-core" % "0.6" intransitive
     val eaio = "com.eaio.uuid" % "uuid" % "3.2"
 
     // Test
-    val hadoopTest = "org.apache.hadoop" % "hadoop-test" % "0.20.2-CDH3B4" % "test"
-    val hbaseTest = "org.apache.hbase" % "hbase" % "0.90.1-CDH3B4" % "test" classifier "tests"
+    val hadoopTest = "org.apache.hadoop" % "hadoop-test" % "0.20.2-cdh3u0" % "test"
+    val hbaseTest = "org.apache.hbase" % "hbase" % "0.90.1-cdh3u0" % "test" classifier "tests"
     val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
     val junit = "junit" % "junit" % "4.5" % "test"
   }

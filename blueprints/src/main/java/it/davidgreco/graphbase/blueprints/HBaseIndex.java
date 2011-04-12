@@ -90,6 +90,11 @@ class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
     }
 
     @Override
+    public long count(String s, Object o) {
+        throw new RuntimeException("Not supported");
+    }
+
+    @Override
     public void remove(String key, Object value, T element) {
         try {
             if (this.indexClass.isAssignableFrom(element.getClass())) {
