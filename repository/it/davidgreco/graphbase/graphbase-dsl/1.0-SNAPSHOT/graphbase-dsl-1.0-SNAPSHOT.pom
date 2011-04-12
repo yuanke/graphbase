@@ -15,24 +15,9 @@
     </dependencies>
     <repositories>
         <repository>
-            <id>TinkerPopRepository</id>
-            <name>TinkerPop Repository</name>
-            <url>http://tinkerpop.com/maven2/</url>
-        </repository>
-        <repository>
-            <id>EaioUUIDlibraryRepository</id>
-            <name>Eaio UUID library Repository</name>
-            <url>http://eaio.com/maven2/</url>
-        </repository>
-        <repository>
-            <id>TemporaryThriftRepository</id>
-            <name>Temporary Thrift Repository</name>
-            <url>http://people.apache.org/~rawson/repo/</url>
-        </repository>
-        <repository>
-            <id>ClouderaRepository</id>
-            <name>Cloudera Repository</name>
-            <url>https://repository.cloudera.com/content/groups/cloudera-repos/</url>
+            <id>ScalaToolsReleases</id>
+            <name>Scala Tools Releases</name>
+            <url>http://scala-tools.org/repo-releases/</url>
         </repository>
         <repository>
             <id>SunRepository</id>
@@ -40,9 +25,34 @@
             <url>http://download.java.net/maven/2/</url>
         </repository>
         <repository>
+            <id>ScalaToolsSnapshots</id>
+            <name>Scala Tools Snapshots</name>
+            <url>http://scala-tools.org/repo-snapshots/</url>
+        </repository>
+        <repository>
+            <id>TinkerPopRepository</id>
+            <name>TinkerPop Repository</name>
+            <url>http://tinkerpop.com/maven2/</url>
+        </repository>
+        <repository>
+            <id>ClouderaRepository</id>
+            <name>Cloudera Repository</name>
+            <url>https://repository.cloudera.com/content/groups/cloudera-repos/</url>
+        </repository>
+        <repository>
+            <id>TemporaryThriftRepository</id>
+            <name>Temporary Thrift Repository</name>
+            <url>http://people.apache.org/~rawson/repo/</url>
+        </repository>
+        <repository>
             <id>ClouderaRepositoryThirdParty</id>
             <name>Cloudera Repository Third Party</name>
             <url>https://repository.cloudera.com/content/repositories/third-party/</url>
+        </repository>
+        <repository>
+            <id>EaioUUIDlibraryRepository</id>
+            <name>Eaio UUID library Repository</name>
+            <url>http://eaio.com/maven2/</url>
         </repository>
         <repository>
             <id>ScalaToolsMaven2Repository</id>
