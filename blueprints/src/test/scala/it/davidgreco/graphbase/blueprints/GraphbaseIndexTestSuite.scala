@@ -6,7 +6,7 @@ import org.scalatest.{BeforeAndAfterEach, Spec}
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.util.Bytes
-import com.tinkerpop.blueprints.pgm.{Element, Edge, Vertex, IndexableGraph}
+import com.tinkerpop.blueprints.pgm.{Edge, Vertex, IndexableGraph}
 
 class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHbase {
 
@@ -75,6 +75,38 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
       assert(e1n1.size == 1)
       assert(e1n2.size == 1)
       assert(toString(e1n1.toBuffer.apply(0).getId) == toString(e1n2.toBuffer.apply(0).getId))
+    }
+
+    it("shouldn't allow an index defined for edges to index vertices") {
+      val conf = HBaseConfiguration.create
+      conf.set("hbase.zookeeper.quorum", "localhost")
+      conf.set("hbase.zookeeper.property.clientPort", port)
+      val admin = new HBaseAdmin(conf)
+      val graph: IndexableGraph = new HBaseGraph(admin, "simple")
+
+      val iv = graph.createAutomaticIndex("idx3", classOf[Edge], Set("Prop1"))
+
+      val v1 = graph.addVertex(null)
+      v1.setProperty("Prop1", "Val1")
+      val v1a = iv.get("Prop1", "Val1")
+      assert(v1a.size == 0)
+    }
+
+    it("shouldn't allow an index defined for vertices to index edges") {
+      val conf = HBaseConfiguration.create
+      conf.set("hbase.zookeeper.quorum", "localhost")
+      conf.set("hbase.zookeeper.property.clientPort", port)
+      val admin = new HBaseAdmin(conf)
+      val graph: IndexableGraph = new HBaseGraph(admin, "simple")
+
+      val ie = graph.createAutomaticIndex("idx4", classOf[Vertex], Set("Prop1"))
+
+      val v1 = graph.addVertex(null)
+      val v2 = graph.addVertex(null)
+      val e1 = graph.addEdge(null, v1, v2, "")
+      e1.setProperty("Prop1", "Val1")
+      val e1a = ie.get("Prop1", "Val1")
+      assert(e1a.size == 0)
     }
 
   }
