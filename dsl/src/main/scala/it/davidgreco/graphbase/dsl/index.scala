@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import sbt._
+package it.davidgreco.graphbase.dsl
 
-class Plugins(info: ProjectInfo) extends PluginDefinition(info) {
+import com.tinkerpop.blueprints.pgm.{Element, AutomaticIndex}
 
-}
+class index[T <: Element](val index: AutomaticIndex[T])

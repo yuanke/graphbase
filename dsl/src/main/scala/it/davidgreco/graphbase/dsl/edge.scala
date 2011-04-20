@@ -14,8 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import sbt._
+package it.davidgreco.graphbase.dsl
 
-class Plugins(info: ProjectInfo) extends PluginDefinition(info) {
+import com.tinkerpop.blueprints.pgm.{Edge, Vertex, Graph}
+
+class edge(val edge: Edge) {
+  def <=(prop: Tuple2[String, AnyRef]): edge ={
+    this.edge.setProperty(prop._1, prop._2)
+    this
+  }
 
 }
+
+
+
+
+
+
