@@ -25,6 +25,16 @@ class graph(val graph: Graph) {
     new vertex(this.graph.addVertex(null))
   }
 
+  def getVertex(id: AnyRef): Option[vertex] = {
+    val v = graph.getVertex(id)
+    if (v != null) Some(new vertex(v)) else None
+  }
+
+  def getEdge(id: AnyRef): Option[edge] = {
+    val e = graph.getEdge(id)
+    if (e != null) Some(new edge(e)) else None
+  }
+
   def addEdge(out: vertex, in: vertex, label: String): edge = {
     new edge(this.graph.addEdge(null, out.vertex, in.vertex, label))
   }
@@ -43,6 +53,14 @@ class graph(val graph: Graph) {
   }
 
   def unary_+(): vertex = addVertex
+
+  def ?\/(id: AnyRef): Option[vertex] = {
+    this.getVertex(id)
+  }
+
+  def ?--(id: AnyRef): Option[edge] = {
+    this.getEdge(id)
+  }
 
   def <=(edge: Tuple3[vertex, String, vertex]): edge = addEdge(edge._1, edge._3, edge._2)
 

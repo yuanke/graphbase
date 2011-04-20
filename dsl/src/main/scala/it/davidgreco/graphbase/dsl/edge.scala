@@ -19,11 +19,17 @@ package it.davidgreco.graphbase.dsl
 import com.tinkerpop.blueprints.pgm.{Edge, Vertex, Graph}
 
 class edge(val edge: Edge) {
-  def <=(prop: Tuple2[String, AnyRef]): edge ={
+
+  def getId: AnyRef = this.edge.getId
+
+  def setProperty[T](prop: Tuple2[String, T]): edge = {
     this.edge.setProperty(prop._1, prop._2)
     this
   }
 
+  def <=[T](prop: Tuple2[String, T]): edge = {
+    setProperty(prop)
+  }
 }
 
 
