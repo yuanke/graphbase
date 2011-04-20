@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import java.io.File
 import sbt._
 
@@ -58,6 +59,7 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
   object Dependencies {
     // Compile
     val tinkerpop = "com.tinkerpop.blueprints" % "blueprints-core" % "0.6" intransitive
+    val zookeeper = "org.apache.zookeeper" % "zookeeper" % "3.3.3-cdh3u0"
     val eaio = "com.eaio.uuid" % "uuid" % "3.2"
 
     // Test
@@ -97,6 +99,7 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     // Compile
     lazy val tinkerpop = Dependencies.tinkerpop
     lazy val eaio = Dependencies.eaio
+    lazy val zookeeper = Dependencies.zookeeper
 
     // Test
     lazy val hadoopTest = Dependencies.hadoopTest
@@ -107,7 +110,7 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     // Compile
     override def ivyXML =
       <dependencies>
-        <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2-CDH3B4" conf="compile">
+        <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2-cdh3u0" conf="compile">
             <exclude module="commons-cli"/>
             <exclude module="xmlenc"/>
             <exclude module="commons-httpclient"/>
@@ -132,7 +135,7 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
             <exclude module="jackson-core-asl"/>
             <exclude module="jackson-mapper-asl"/>
         </dependency>
-        <dependency org="org.apache.hbase" name="hbase" rev="0.90.1-CDH3B4" conf="compile">
+        <dependency org="org.apache.hbase" name="hbase" rev="0.90.1-cdh3u0" conf="compile">
             <exclude module="avro"/>
             <exclude module="commons-lang"/>
             <exclude module="guava"/>
