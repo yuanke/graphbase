@@ -19,6 +19,7 @@ package it.davidgreco.graphbase.dsl
 class element[A, T <: {
   def setProperty(key : String, value : AnyRef) : Unit
   def getProperty(key : String) : AnyRef
+  def removeProperty(key : String) : AnyRef
 }](e: T) {
 
   def setProperty[P](prop: Tuple2[String, P]): A = {
@@ -26,8 +27,12 @@ class element[A, T <: {
     this.asInstanceOf[A]
   }
 
-  def getProperty(key: String): AnyRef = {
-    e.getProperty(key)
+  def getProperty(key: String): Option[AnyRef] = {
+    Option(e.getProperty(key))
+  }
+
+  def removeProperty(key: String): Option[AnyRef] = {
+    Option(e.removeProperty(key))
   }
 
   def <=[P](prop: Tuple2[String, P]) = {
@@ -36,6 +41,10 @@ class element[A, T <: {
 
   def >=(key: String) = {
     this.getProperty(key)
+  }
+
+  def -=(key: String) = {
+    this.removeProperty(key)
   }
 
 }

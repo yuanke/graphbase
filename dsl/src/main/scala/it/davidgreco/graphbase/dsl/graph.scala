@@ -18,34 +18,34 @@ package it.davidgreco.graphbase.dsl
 
 import scala.collection.JavaConversions._
 import com.tinkerpop.blueprints.pgm._
+import org.apache.hadoop.hbase.client.HBaseAdmin
+import it.davidgreco.graphbase.blueprints.HBaseGraph
 
-class graph(val graph: Graph) {
+class graph(val admin: HBaseAdmin, val name: String) {
 
-  def addVertex(): vertex = {
-    new vertex(this.graph.addVertex(null))
-  }
+  val graph = new HBaseGraph(admin, name)
+
+  def addVertex(): vertex = new vertex(this.graph.addVertex(null))
 
   def getVertex(id: AnyRef): Option[vertex] = {
     val v = graph.getVertex(id)
     if (v != null) Some(new vertex(v)) else None
   }
 
+  def removeVertex(v: vertex): Unit = graph.removeVertex(v.vertex)
+
   def getEdge(id: AnyRef): Option[edge] = {
     val e = graph.getEdge(id)
     if (e != null) Some(new edge(e)) else None
   }
 
-  def addEdge(out: vertex, in: vertex, label: String): edge = {
-    new edge(this.graph.addEdge(null, out.vertex, in.vertex, label))
-  }
+  def addEdge(out: vertex, in: vertex, label: String): edge = new edge(this.graph.addEdge(null, out.vertex, in.vertex, label))
 
-  def addVertexIndex(name: String, props: Set[String]): index[Vertex] = {
-    new index[Vertex](this.graph.asInstanceOf[IndexableGraph].createAutomaticIndex(name, classOf[Vertex], props))
-  }
+  def removeEdge(e: edge): Unit = graph.removeEdge(e.edge)
 
-  def addEdgeIndex(name: String, props: Set[String]): index[Edge] = {
-    new index[Edge](this.graph.asInstanceOf[IndexableGraph].createAutomaticIndex(name, classOf[Edge], props))
-  }
+  def addVertexIndex(name: String, props: Set[String]): index[Vertex] = new index[Vertex](this.graph.asInstanceOf[IndexableGraph].createAutomaticIndex(name, classOf[Vertex], props))
+
+  def addEdgeIndex(name: String, props: Set[String]): index[Edge] = new index[Edge](this.graph.asInstanceOf[IndexableGraph].createAutomaticIndex(name, classOf[Edge], props))
 
   def removeIndex(name: String): graph = {
     this.graph.asInstanceOf[IndexableGraph].dropIndex(name)
@@ -54,34 +54,30 @@ class graph(val graph: Graph) {
 
   def unary_+(): vertex = addVertex
 
-  def ?\/(id: AnyRef): Option[vertex] = {
-    this.getVertex(id)
-  }
+  def ?\/(id: AnyRef): Option[vertex] = getVertex(id)
 
-  def ?--(id: AnyRef): Option[edge] = {
-    this.getEdge(id)
-  }
+  def -(v: vertex): Unit = removeVertex(v)
 
-  def <=(edge: Tuple3[vertex, String, vertex]): edge = addEdge(edge._1, edge._3, edge._2)
+  def ?--(id: AnyRef): Option[edge] = getEdge(id)
 
-  def +=|(name: String, props: List[String]): index[Vertex] = {
-    this.addVertexIndex(name, props.toSet)
-  }
+  def +(edge: Tuple3[vertex, String, vertex]): edge = addEdge(edge._1, edge._3, edge._2)
 
-  def +=||(name: String, props: List[String]): index[Edge] = {
-    this.addEdgeIndex(name, props.toSet)
-  }
+  def -(e: edge): Unit = removeEdge(e)
+
+  def +=|(name: String, props: List[String]): index[Vertex] = addVertexIndex(name, props.toSet)
+
+  def +=||(name: String, props: List[String]): index[Edge] = addEdgeIndex(name, props.toSet)
 
   def -=|(name: String): graph = {
-    this.removeIndex(name)
+    removeIndex(name)
     this
   }
 }
 
 object graph {
 
-  def apply(graph: Graph): graph = {
-    new graph(graph)
+  def apply(admin: HBaseAdmin, name: String): graph = {
+    new graph(admin, name)
   }
 
 }

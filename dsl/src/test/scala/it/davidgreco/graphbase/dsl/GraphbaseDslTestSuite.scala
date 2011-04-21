@@ -16,14 +16,12 @@
  */
 package it.davidgreco.graphbase.dsl
 
-import scala.collection.JavaConversions._
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{BeforeAndAfterEach, Spec}
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.util.Bytes
-import it.davidgreco.graphbase.blueprints.{EmbeddedHbase, HBaseGraph}
-import com.tinkerpop.blueprints.pgm.Graph
+import it.davidgreco.graphbase.blueprints.EmbeddedHbase
 
 class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHbase {
 
@@ -36,42 +34,40 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
-      val g: Graph = new HBaseGraph(admin, "simple")
 
-      val G = new graph(g)
+      val G = new graph(admin, "simple")
 
-      val v1 = +G <= ("PIPPO", 1)
-
-      val p = v1 >= "PIPPO"
-
+      val v1 = +G
       val v3 = G ?\/ ~v1
 
-      assert(toString(~v1) == toString(~v3.get))
+      assert(~v1 == ~v3.get)
     }
-    /*
+
     it("should add and retrieve vertex properties") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
-      val v1 = graph.addVertex(null)
 
-      v1.setProperty("A_STRING", "DAVID")
-      v1.setProperty("A_LONG", 1234567L)
-      v1.setProperty("AN_INT", 123456)
-      v1.setProperty("A_SHORT", 1234)
-      v1.setProperty("A_FLOAT", 3.1415926535F)
-      v1.setProperty("A_DOUBLE", 3.1415926535D)
-      v1.setProperty("A_BOOLEAN", true)
+      val G = new graph(admin, "simple")
 
-      assert(v1.getProperty("A_STRING") == "DAVID")
-      assert(v1.getProperty("A_LONG") == 1234567L)
-      assert(v1.getProperty("AN_INT") == 123456)
-      assert(v1.getProperty("A_SHORT") == 1234)
-      assert(v1.getProperty("A_FLOAT") == 3.1415926535F)
-      assert(v1.getProperty("A_DOUBLE") == 3.1415926535D)
-      assert(v1.getProperty("A_BOOLEAN") == true)
+      val v1 = +G
+
+      v1 <= ("A_STRING", "DAVID")
+      v1 <= ("A_LONG", 1234567L)
+      v1 <= ("AN_INT", 123456)
+      v1 <= ("A_SHORT", 1234)
+      v1 <= ("A_FLOAT", 3.1415926535F)
+      v1 <= ("A_DOUBLE", 3.1415926535D)
+      v1 <= ("A_BOOLEAN", true)
+
+      assert((v1 >= "A_STRING") == Some("DAVID"))
+      assert((v1 >= "A_LONG") == Some(1234567L))
+      assert((v1 >= "AN_INT") == Some(123456))
+      assert((v1 >= "A_SHORT") == Some(1234))
+      assert((v1 >= "A_FLOAT") == Some(3.1415926535F))
+      assert((v1 >= "A_DOUBLE") == Some(3.1415926535D))
+      assert((v1 >= "A_BOOLEAN") == Some(true))
 
     }
 
@@ -80,12 +76,13 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
-      val v1 = graph.addVertex(null)
+      val G = new graph(admin, "simple")
 
-      graph.removeVertex(v1)
+      val v1 = +G
 
-      assert(graph.getVertex(v1.getId) == null)
+      G - v1
+
+      assert(G ?\/ ~v1 == None)
     }
 
     it("should remove vertex properties") {
@@ -93,12 +90,13 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
-      val v1 = graph.addVertex(null)
+      val G = new graph(admin, "simple")
 
-      v1.setProperty("A_STRING", "DAVID")
-      assert(v1.removeProperty("A_STRING") == "DAVID")
-      assert(v1.getProperty("A_STRING") == null)
+      val v1 = +G
+
+      v1 <= ("A_STRING", "DAVID")
+      assert((v1 -= "A_STRING") == Some("DAVID"))
+      assert((v1 >= "A_STRING") == None)
     }
 
     it("should complain on non supported property type") {
@@ -106,12 +104,12 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val G = new graph(admin, "simple")
 
-      val v1 = graph.addVertex(null);
+      val v1 = +G
 
       intercept[RuntimeException] {
-        v1.setProperty("NOT_SUPPORTED", List("A"))
+        v1 <= ("NOT_SUPPORTED", List("A"))
       }
     }
 
@@ -120,30 +118,31 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val G = new graph(admin, "simple")
 
-      val v1 = graph.addVertex(null)
-      val v2 = graph.addVertex(null)
-      val v3 = graph.addVertex(null)
-      val v4 = graph.addVertex(null)
-      val v5 = graph.addVertex(null)
+      val v1 = +G
+      val v2 = +G
+      val v3 = +G
+      val v4 = +G
+      val v5 = +G
 
-      val e1 = graph.addEdge(null, v1, v2, "e1")
-      val e2 = graph.addEdge(null, v1, v3, "e2")
-      val e3 = graph.addEdge(null, v2, v3, "e3")
-      val e4 = graph.addEdge(null, v2, v4, "e4")
-      val e5 = graph.addEdge(null, v3, v2, "e5")
-      val e6 = graph.addEdge(null, v3, v4, "e6")
-      val e7 = graph.addEdge(null, v3, v5, "e7")
-      val e8 = graph.addEdge(null, v4, v5, "e8")
-      val e9 = graph.addEdge(null, v5, v4, "e9")
-      val e10 = graph.addEdge(null, v5, v1, "e10")
+      val e1 = G + (v1, "e1", v2)
+      val e2 = G + (v1, "e2", v3)
+      val e3 = G + (v2, "e3", v3)
+      val e4 = G + (v2, "e4", v4)
+      val e5 = G + (v3, "e5", v2)
+      val e6 = G + (v3, "e6", v4)
+      val e7 = G + (v3, "e7", v5)
+      val e8 = G + (v4, "e8", v5)
+      val e9 = G + (v5, "e9", v4)
+      val e10 = G + (v5, "e10", v1)
 
-      val e1n = graph.getEdge(e1.getId)
-      assert(toString(e1n.getOutVertex.getId) == toString(v1.getId))
-      assert(toString(e1n.getInVertex.getId) == toString(v2.getId))
-      assert(e1n.getLabel == "e1")
+      val e1n = G ?-- ~e1
+      //assert(toString(e1n.getOutVertex.getId) == toString(v1.getId))
+      //assert(toString(e1n.getInVertex.getId) == toString(v2.getId))
+      //assert(e1n.getLabel == "e1")
 
+      /*
       val e2n = graph.getEdge(e2.getId)
       assert(toString(e2n.getOutVertex.getId) == toString(v1.getId))
       assert(toString(e2n.getInVertex.getId) == toString(v3.getId))
@@ -188,8 +187,9 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       assert(toString(e10n.getOutVertex.getId) == toString(v5.getId))
       assert(toString(e10n.getInVertex.getId) == toString(v1.getId))
       assert(e10n.getLabel == "e10")
+      */
     }
-
+    /*
     it("should create and retrieve edge properties") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
