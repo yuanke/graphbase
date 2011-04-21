@@ -16,18 +16,26 @@
  */
 package it.davidgreco.graphbase.dsl
 
-import com.tinkerpop.blueprints.pgm.{Edge, Vertex, Graph}
+class element[A, T <: {
+  def setProperty(key : String, value : AnyRef) : Unit
+  def getProperty(key : String) : AnyRef
+}](e: T) {
 
-class edge(val edge: Edge) extends element[edge, Edge](edge) {
+  def setProperty[P](prop: Tuple2[String, P]): A = {
+    e.setProperty(prop._1, prop._2.asInstanceOf[AnyRef])
+    this.asInstanceOf[A]
+  }
 
-  def getId: AnyRef = this.edge.getId
+  def getProperty(key: String): AnyRef = {
+    e.getProperty(key)
+  }
 
-  def unary_~ : AnyRef = this.edge.getId
+  def <=[P](prop: Tuple2[String, P]) = {
+    this.setProperty(prop)
+  }
+
+  def >=(key: String) = {
+    this.getProperty(key)
+  }
 
 }
-
-
-
-
-
-

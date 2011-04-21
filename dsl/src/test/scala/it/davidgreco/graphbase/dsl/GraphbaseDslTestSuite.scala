@@ -40,7 +40,9 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
 
       val G = new graph(g)
 
-      val v1 = +G
+      val v1 = +G <= ("PIPPO", 1)
+
+      val p = v1 >= "PIPPO"
 
       val v3 = G ?\/ ~v1
 

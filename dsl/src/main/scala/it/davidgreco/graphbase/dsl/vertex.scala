@@ -18,18 +18,9 @@ package it.davidgreco.graphbase.dsl
 
 import com.tinkerpop.blueprints.pgm.Vertex
 
-class vertex(val vertex: Vertex) {
+class vertex(val vertex: Vertex) extends element[vertex, Vertex](vertex) {
 
   def getId: AnyRef = this.vertex.getId
-
-  def setProperty[T](prop: Tuple2[String, T]): vertex = {
-    this.vertex.setProperty(prop._1, prop._2)
-    this
-  }
-
-  def <=[T](prop: Tuple2[String, T]): vertex = {
-    setProperty(prop)
-  }
 
   def unary_~ : AnyRef = this.vertex.getId
 }
