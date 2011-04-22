@@ -20,10 +20,17 @@ import com.tinkerpop.blueprints.pgm.{Edge, Vertex, Graph}
 
 class edge(val edge: Edge) extends element[edge, Edge](edge) {
 
-  def getId: AnyRef = this.edge.getId
+  def getInVertex: vertex = new vertex(edge.getInVertex)
 
-  def unary_~ : AnyRef = this.edge.getId
+  def getOutVertex: vertex = new vertex(edge.getOutVertex)
 
+  def getLabel: String = edge.getLabel
+
+  def =>\/ : vertex = this.getOutVertex
+
+  def <=\/ : vertex = this.getInVertex
+
+  def L : String = this.getLabel
 }
 
 

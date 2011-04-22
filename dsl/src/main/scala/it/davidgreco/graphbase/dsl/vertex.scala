@@ -20,9 +20,6 @@ import com.tinkerpop.blueprints.pgm.Vertex
 
 class vertex(val vertex: Vertex) extends element[vertex, Vertex](vertex) {
 
-  def getId: AnyRef = this.vertex.getId
-
-  def unary_~ : AnyRef = this.vertex.getId
 }
 
 

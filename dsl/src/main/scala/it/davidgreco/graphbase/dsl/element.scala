@@ -20,7 +20,10 @@ class element[A, T <: {
   def setProperty(key : String, value : AnyRef) : Unit
   def getProperty(key : String) : AnyRef
   def removeProperty(key : String) : AnyRef
+  def getId() : AnyRef
 }](e: T) {
+
+  def getId: AnyRef = e.getId
 
   def setProperty[P](prop: Tuple2[String, P]): A = {
     e.setProperty(prop._1, prop._2.asInstanceOf[AnyRef])
@@ -46,5 +49,7 @@ class element[A, T <: {
   def -=(key: String) = {
     this.removeProperty(key)
   }
+
+ def unary_~ : AnyRef = this.getId
 
 }
