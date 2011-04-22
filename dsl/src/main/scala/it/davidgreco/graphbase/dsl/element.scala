@@ -16,11 +16,14 @@
  */
 package it.davidgreco.graphbase.dsl
 
+import collection.JavaConversions._
+
 class element[A, T <: {
   def setProperty(key : String, value : AnyRef) : Unit
   def getProperty(key : String) : AnyRef
   def removeProperty(key : String) : AnyRef
   def getId() : AnyRef
+  def getPropertyKeys() : java.util.Set[String]
 }](e: T) {
 
   def getId: AnyRef = e.getId
@@ -38,18 +41,16 @@ class element[A, T <: {
     Option(e.removeProperty(key))
   }
 
-  def <=[P](prop: Tuple2[String, P]) = {
-    this.setProperty(prop)
-  }
+  def getPropertyKeys: Set[String] = e.getPropertyKeys.toSet
 
-  def >=(key: String) = {
-    this.getProperty(key)
-  }
+  def <=[P](prop: Tuple2[String, P]) = setProperty(prop)
 
-  def -=(key: String) = {
-    this.removeProperty(key)
-  }
+  def >=(key: String) = getProperty(key)
 
- def unary_~ : AnyRef = this.getId
+  def -=(key: String) = removeProperty(key)
+
+  def >>= = getPropertyKeys
+
+  def unary_~ : AnyRef = this.getId
 
 }

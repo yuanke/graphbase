@@ -16,9 +16,22 @@
  */
 package it.davidgreco.graphbase.dsl
 
+import collection.JavaConversions._
 import com.tinkerpop.blueprints.pgm.Vertex
 
 class vertex(val vertex: Vertex) extends element[vertex, Vertex](vertex) {
+
+  def getInEdges: List[edge] = (for{ e <- vertex.getInEdges } yield new edge(e)).toList
+
+  def getOutEdges: List[edge] = (for{ e <- vertex.getOutEdges } yield new edge(e)).toList
+
+  def getInEdges(label: String): List[edge] = (for{ e <- vertex.getInEdges(label) } yield new edge(e)).toList
+
+  def getOutEdges(label: String): List[edge] = (for{ e <- vertex.getOutEdges(label) } yield new edge(e)).toList
+
+  def >>=<- = getInEdges
+
+  def >>=-> = getOutEdges
 
 }
 

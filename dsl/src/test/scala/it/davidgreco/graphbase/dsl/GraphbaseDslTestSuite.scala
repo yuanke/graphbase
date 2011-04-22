@@ -159,22 +159,24 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       assert((e1 >= "A_FLOAT") == Option(3.1415926535F))
       assert((e1 >= "A_DOUBLE") == Option(3.1415926535D))
       assert((e1 >= "A_BOOLEAN") == Option(true))
-      //assert(e2.getPropertyKeys.toSet == Set("A_STRING", "A_LONG", "AN_INT", "A_SHORT", "A_FLOAT", "A_DOUBLE", "A_BOOLEAN"))
+      assert((e1 >>=) == Set("A_STRING", "A_LONG", "AN_INT", "A_SHORT", "A_FLOAT", "A_DOUBLE", "A_BOOLEAN"))
     }
-    /*
+
     it("should remove edge properties") {
       var conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
-      val v1 = graph.addVertex(null)
-      val v2 = graph.addVertex(null)
-      val e1 = graph.addEdge(null, v1, v2, "LABEL")
+      val G = new graph(admin, "simple")
 
-      e1.setProperty("A_STRING", "DAVID")
-      assert(e1.removeProperty("A_STRING") == "DAVID")
-      assert(e1.getProperty("A_STRING") == null)
+      val v1 = +G
+      val v2 = +G
+
+      val e1 = G + (v1, "e1", v2)
+
+      e1 <= ("A_STRING", "DAVID")
+      assert((e1 -= "A_STRING") == Some("DAVID"))
+      assert((e1 -= "A_STRING") == None)
     }
 
     it("should remove edges") {
@@ -182,66 +184,34 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val G = new graph(admin, "simple")
 
-      val v1 = graph.addVertex(null)
-      val v2 = graph.addVertex(null)
-      val v3 = graph.addVertex(null)
-      val e1 = graph.addEdge(null, v1, v2, "e1")
-      val e2 = graph.addEdge(null, v1, v3, "e2")
+      val v1 = +G
+      val v2 = +G
+      val v3 = +G
+      val e1 = G + (v1, "e1", v2)
+      val e2 = G + (v1, "e2", v3)
 
-      assert(v2.getInEdges.size == 1)
-      assert(v1.getOutEdges.size == 2)
-      assert(v3.getInEdges.size == 1)
+      assert((v2 >>=<-).size == 1)
+      assert((v1 >>=->).size == 2)
+      assert((v3 >>=<-).size == 1)
 
-      e1.setProperty("A_STRING", "DAVID")
-      e1.setProperty("A_LONG", 1234567L)
-      e1.setProperty("AN_INT", 123456)
-      e1.setProperty("A_SHORT", 1234)
-      e1.setProperty("A_FLOAT", 3.1415926535F)
-      e1.setProperty("A_DOUBLE", 3.1415926535D)
-      e1.setProperty("A_BOOLEAN", true)
+      G - e1
+      assert((v2 >>=<-).size == 0)
+      assert((v1 >>=->).size == 1)
+      assert((v3 >>=<-).size == 1)
 
-      e2.setProperty("A_STRING", "DAVID")
-      e2.setProperty("A_LONG", 1234567L)
-      e2.setProperty("AN_INT", 123456)
-      e2.setProperty("A_SHORT", 1234)
-      e2.setProperty("A_FLOAT", 3.1415926535F)
-      e2.setProperty("A_DOUBLE", 3.1415926535D)
-      e2.setProperty("A_BOOLEAN", true)
+      G - e2
+      assert((v2 >>=<-).size == 0)
+      assert((v1 >>=->).size == 0)
+      assert((v3 >>=<-).size == 0)
 
-      graph.removeEdge(e1);
-      assert(v2.getInEdges.size == 0)
-      assert(v1.getOutEdges.size == 1)
-      assert(v3.getInEdges.size == 1)
+      val e1n = G ?-- ~e1
+      val e2n = G ?-- ~e2
 
-      graph.removeEdge(e2);
-      assert(v2.getInEdges.size == 0)
-      assert(v1.getOutEdges.size == 0)
-      assert(v3.getInEdges.size == 0)
-
-      val e1n = graph.getEdge(e1.getId)
-      val e2n = graph.getEdge(e2.getId)
-
-      assert(e1n == null)
-      assert(e2n == null)
-
-      assert(e1.getProperty("A_STRING") == null)
-      assert(e1.getProperty("A_LONG") == null)
-      assert(e1.getProperty("AN_INT") == null)
-      assert(e1.getProperty("A_SHORT") == null)
-      assert(e1.getProperty("A_FLOAT") == null)
-      assert(e1.getProperty("A_DOUBLE") == null)
-      assert(e1.getProperty("A_BOOLEAN") == null)
-
-      assert(e2.getProperty("A_STRING") == null)
-      assert(e2.getProperty("A_LONG") == null)
-      assert(e2.getProperty("AN_INT") == null)
-      assert(e2.getProperty("A_SHORT") == null)
-      assert(e2.getProperty("A_FLOAT") == null)
-      assert(e2.getProperty("A_DOUBLE") == null)
-      assert(e2.getProperty("A_BOOLEAN") == null)
-    }*/
+      assert(e1n == None)
+      assert(e2n == None)
+    }
   }
 
   def toString(id: AnyRef): String = Bytes.toString(id.asInstanceOf[Array[Byte]]);
