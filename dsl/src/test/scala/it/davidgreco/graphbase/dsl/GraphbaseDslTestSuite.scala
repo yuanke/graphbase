@@ -37,7 +37,7 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
 
       val G = new graph(admin, "simple")
 
-      val v1 = +G
+      val v1 = G +=\/
       val v3 = G ?\/ ~v1
 
       assert(toString(~v1) == toString(~v3.get))
@@ -51,23 +51,23 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
 
       val G = new graph(admin, "simple")
 
-      val v1 = +G
+      val v1 = G +=\/
 
-      v1 <= ("A_STRING", "DAVID")
-      v1 <= ("A_LONG", 1234567L)
-      v1 <= ("AN_INT", 123456)
-      v1 <= ("A_SHORT", 1234)
-      v1 <= ("A_FLOAT", 3.1415926535F)
-      v1 <= ("A_DOUBLE", 3.1415926535D)
-      v1 <= ("A_BOOLEAN", true)
+      v1 p_<- ("A_STRING", "DAVID")
+      v1 p_<- ("A_LONG", 1234567L)
+      v1 p_<- ("AN_INT", 123456)
+      v1 p_<- ("A_SHORT", 1234)
+      v1 p_<- ("A_FLOAT", 3.1415926535F)
+      v1 p_<- ("A_DOUBLE", 3.1415926535D)
+      v1 p_<- ("A_BOOLEAN", true)
 
-      assert((v1 >= "A_STRING") == Some("DAVID"))
-      assert((v1 >= "A_LONG") == Some(1234567L))
-      assert((v1 >= "AN_INT") == Some(123456))
-      assert((v1 >= "A_SHORT") == Some(1234))
-      assert((v1 >= "A_FLOAT") == Some(3.1415926535F))
-      assert((v1 >= "A_DOUBLE") == Some(3.1415926535D))
-      assert((v1 >= "A_BOOLEAN") == Some(true))
+      assert((v1 p_-> "A_STRING") == Some("DAVID"))
+      assert((v1 p_-> "A_LONG") == Some(1234567L))
+      assert((v1 p_-> "AN_INT") == Some(123456))
+      assert((v1 p_-> "A_SHORT") == Some(1234))
+      assert((v1 p_-> "A_FLOAT") == Some(3.1415926535F))
+      assert((v1 p_-> "A_DOUBLE") == Some(3.1415926535D))
+      assert((v1 p_-> "A_BOOLEAN") == Some(true))
 
     }
 
@@ -78,9 +78,9 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       val admin = new HBaseAdmin(conf)
       val G = new graph(admin, "simple")
 
-      val v1 = +G
+      val v1 = G +=\/
 
-      G - v1
+      G -=\/ v1
 
       assert(G ?\/ ~v1 == None)
     }
@@ -92,11 +92,11 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       val admin = new HBaseAdmin(conf)
       val G = new graph(admin, "simple")
 
-      val v1 = +G
+      val v1 = G +=\/
 
-      v1 <= ("A_STRING", "DAVID")
-      assert((v1 -= "A_STRING") == Some("DAVID"))
-      assert((v1 >= "A_STRING") == None)
+      v1 p_<- ("A_STRING", "DAVID")
+      assert((v1 p_-= "A_STRING") == Some("DAVID"))
+      assert((v1 p_-> "A_STRING") == None)
     }
 
     it("should complain on non supported property type") {
@@ -106,10 +106,10 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       val admin = new HBaseAdmin(conf)
       val G = new graph(admin, "simple")
 
-      val v1 = +G
+      val v1 = G +=\/
 
       intercept[RuntimeException] {
-        v1 <= ("NOT_SUPPORTED", List("A"))
+        v1 p_<- ("NOT_SUPPORTED", List("A"))
       }
     }
 
@@ -120,16 +120,16 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       val admin = new HBaseAdmin(conf)
       val G = new graph(admin, "simple")
 
-      val v1 = +G
-      val v2 = +G
+      val v1 = G +=\/
+      val v2 = G +=\/
 
-      val e1 = G + (v1, "e1", v2)
+      val e1 = G +=-- (v1, "e1", v2)
 
       val e1n = G ?-- ~e1
 
-      assert(toString(~(e1n.get =>\/)) == toString(~v1))
-      assert(toString(~(e1n.get <=\/)) == toString(~v2))
-      assert((e1n.get L) == "e1")
+      assert(toString(~(e1n.get ->\/)) == toString(~v1))
+      assert(toString(~(e1n.get <-\/)) == toString(~v2))
+      assert((e1n.get L_<-).get == "e1")
     }
 
     it("should create and retrieve edge properties") {
@@ -139,27 +139,27 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       val admin = new HBaseAdmin(conf)
       val G = new graph(admin, "simple")
 
-      val v1 = +G
-      val v2 = +G
+      val v1 = G +=\/
+      val v2 = G +=\/
 
-      val e1 = G + (v1, "e1", v2)
+      val e1 = G +=-- (v1, "e1", v2)
 
-      e1 <= ("A_STRING", "DAVID")
-      e1 <= ("A_LONG", 1234567L)
-      e1 <= ("AN_INT", 123456)
-      e1 <= ("A_SHORT", 1234)
-      e1 <= ("A_FLOAT", 3.1415926535F)
-      e1 <= ("A_DOUBLE", 3.1415926535D)
-      e1 <= ("A_BOOLEAN", true)
+      e1 p_<- ("A_STRING", "DAVID")
+      e1 p_<- ("A_LONG", 1234567L)
+      e1 p_<- ("AN_INT", 123456)
+      e1 p_<- ("A_SHORT", 1234)
+      e1 p_<- ("A_FLOAT", 3.1415926535F)
+      e1 p_<- ("A_DOUBLE", 3.1415926535D)
+      e1 p_<- ("A_BOOLEAN", true)
 
-      assert((e1 >= "A_STRING") == Option("DAVID"))
-      assert((e1 >= "A_LONG") == Option(1234567L))
-      assert((e1 >= "AN_INT") == Option(123456))
-      assert((e1 >= "A_SHORT") == Option(1234))
-      assert((e1 >= "A_FLOAT") == Option(3.1415926535F))
-      assert((e1 >= "A_DOUBLE") == Option(3.1415926535D))
-      assert((e1 >= "A_BOOLEAN") == Option(true))
-      assert((e1 >>=) == Set("A_STRING", "A_LONG", "AN_INT", "A_SHORT", "A_FLOAT", "A_DOUBLE", "A_BOOLEAN"))
+      assert((e1 p_-> "A_STRING") == Option("DAVID"))
+      assert((e1 p_-> "A_LONG") == Option(1234567L))
+      assert((e1 p_-> "AN_INT") == Option(123456))
+      assert((e1 p_-> "A_SHORT") == Option(1234))
+      assert((e1 p_-> "A_FLOAT") == Option(3.1415926535F))
+      assert((e1 p_-> "A_DOUBLE") == Option(3.1415926535D))
+      assert((e1 p_-> "A_BOOLEAN") == Option(true))
+      assert((e1 p_->>) == Set("A_STRING", "A_LONG", "AN_INT", "A_SHORT", "A_FLOAT", "A_DOUBLE", "A_BOOLEAN"))
     }
 
     it("should remove edge properties") {
@@ -169,14 +169,14 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       val admin = new HBaseAdmin(conf)
       val G = new graph(admin, "simple")
 
-      val v1 = +G
-      val v2 = +G
+      val v1 = G +=\/
+      val v2 = G +=\/
 
-      val e1 = G + (v1, "e1", v2)
+      val e1 = G +=-- (v1, "e1", v2)
 
-      e1 <= ("A_STRING", "DAVID")
-      assert((e1 -= "A_STRING") == Some("DAVID"))
-      assert((e1 -= "A_STRING") == None)
+      e1 p_<- ("A_STRING", "DAVID")
+      assert((e1 p_-= "A_STRING") == Some("DAVID"))
+      assert((e1 p_-= "A_STRING") == None)
     }
 
     it("should remove edges") {
@@ -186,25 +186,25 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
       val admin = new HBaseAdmin(conf)
       val G = new graph(admin, "simple")
 
-      val v1 = +G
-      val v2 = +G
-      val v3 = +G
-      val e1 = G + (v1, "e1", v2)
-      val e2 = G + (v1, "e2", v3)
+      val v1 = G +=\/
+      val v2 = G +=\/
+      val v3 = G +=\/
+      val e1 = G +=-- (v1, "e1", v2)
+      val e2 = G +=-- (v1, "e2", v3)
 
-      assert((v2 >>=<-).size == 1)
-      assert((v1 >>=->).size == 2)
-      assert((v3 >>=<-).size == 1)
+      assert((v2 <<---).size == 1)
+      assert((v1 ->>--).size == 2)
+      assert((v3 <<---).size == 1)
 
-      G - e1
-      assert((v2 >>=<-).size == 0)
-      assert((v1 >>=->).size == 1)
-      assert((v3 >>=<-).size == 1)
+      G -=-- e1
+      assert((v2 <<---).size == 0)
+      assert((v1 ->>--).size == 1)
+      assert((v3 <<---).size == 1)
 
-      G - e2
-      assert((v2 >>=<-).size == 0)
-      assert((v1 >>=->).size == 0)
-      assert((v3 >>=<-).size == 0)
+      G -=-- e2
+      assert((v2 <<---).size == 0)
+      assert((v1 ->>--).size == 0)
+      assert((v3 <<---).size == 0)
 
       val e1n = G ?-- ~e1
       val e2n = G ?-- ~e2

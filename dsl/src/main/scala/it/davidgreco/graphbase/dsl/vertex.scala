@@ -29,9 +29,9 @@ class vertex(val vertex: Vertex) extends element[vertex, Vertex](vertex) {
 
   def getOutEdges(label: String): List[edge] = (for{ e <- vertex.getOutEdges(label) } yield new edge(e)).toList
 
-  def >>=<- = getInEdges
+  def <<--- = getInEdges
 
-  def >>=-> = getOutEdges
+  def ->>-- = getOutEdges
 
 }
 

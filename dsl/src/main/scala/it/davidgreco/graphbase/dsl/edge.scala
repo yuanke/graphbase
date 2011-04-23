@@ -26,11 +26,11 @@ class edge(val edge: Edge) extends element[edge, Edge](edge) {
 
   def getLabel: String = edge.getLabel
 
-  def =>\/ : vertex = this.getOutVertex
+  def ->\/ : vertex = this.getOutVertex
 
-  def <=\/ : vertex = this.getInVertex
+  def <-\/ : vertex = this.getInVertex
 
-  def L : String = this.getLabel
+  def L_<- : Option[String] = Option(this.getLabel)
 }
 
 

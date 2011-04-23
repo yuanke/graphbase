@@ -139,7 +139,6 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
             <exclude module="avro"/>
             <exclude module="commons-lang"/>
             <exclude module="guava"/>
-            <exclude module="commons-logging"/>
             <exclude module="commons-el"/>
             <exclude module="log4j"/>
             <exclude module="zookeeper"/>

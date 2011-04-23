@@ -52,23 +52,55 @@ class graph(val admin: HBaseAdmin, val name: String) {
     this
   }
 
-  def unary_+(): vertex = addVertex
+  /**
+   * It adds a vertex to the graph
+   */
+  def +=\/(): vertex = addVertex
 
+  /**
+   * It gets a vertex given the id, None if it doesn't exist
+   */
   def ?\/(id: AnyRef): Option[vertex] = getVertex(id)
 
-  def -(v: vertex): Unit = removeVertex(v)
+  /**
+   * It removes a vertex from the graph
+   */
+  def -=\/(v: vertex): Unit = removeVertex(v)
 
+  /**
+   * It gets an edge given an id, None if it doesn't exist
+   */
   def ?--(id: AnyRef): Option[edge] = getEdge(id)
 
-  def +(edge: Tuple3[vertex, String, vertex]): edge = addEdge(edge._1, edge._3, edge._2)
+  /**
+   * It adds an edge to the graph
+   */
+  def +=--(edge: Tuple3[vertex, String, vertex]): edge = addEdge(edge._1, edge._3, edge._2)
 
-  def -(e: edge): Unit = removeEdge(e)
+  /**
+   * It adds an edge to the graph without specifying the label
+   */
+  def +=--(edge: Tuple2[vertex, vertex]): edge = addEdge(edge._1, edge._2, null)
 
-  def +=|(name: String, props: List[String]): index[Vertex] = addVertexIndex(name, props.toSet)
+  /**
+   * It removes an edge from a graph
+   */
+  def -=--(e: edge): Unit = removeEdge(e)
 
-  def +=||(name: String, props: List[String]): index[Edge] = addEdgeIndex(name, props.toSet)
+  /**
+   * It adds an automatic index for vertexes
+   */
+  def VI_+=\/(name: String, props: List[String]): index[Vertex] = addVertexIndex(name, props.toSet)
 
-  def -=|(name: String): graph = {
+  /**
+   * It adds an index for edges
+   */
+  def EI_+=--(name: String, props: List[String]): index[Edge] = addEdgeIndex(name, props.toSet)
+
+  /**
+   * It removes an index from the graph
+   */
+  def I_-=(name: String): graph = {
     removeIndex(name)
     this
   }

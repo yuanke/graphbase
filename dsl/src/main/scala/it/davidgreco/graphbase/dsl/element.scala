@@ -43,14 +43,29 @@ class element[A, T <: {
 
   def getPropertyKeys: Set[String] = e.getPropertyKeys.toSet
 
-  def <=[P](prop: Tuple2[String, P]) = setProperty(prop)
+  /**
+   * It sets a property
+   */
+  def p_<-[P](prop: Tuple2[String, P]) = setProperty(prop)
 
-  def >=(key: String) = getProperty(key)
+  /**
+   * It gets a property
+   */
+  def p_->(key: String) = getProperty(key)
 
-  def -=(key: String) = removeProperty(key)
+  /**
+   * It removes a property
+   */
+  def p_-=(key: String) = removeProperty(key)
 
-  def >>= = getPropertyKeys
+  /**
+   * It gets the property keys set
+   */
+  def p_->> = getPropertyKeys
 
+  /**
+   * It gets the id
+   */
   def unary_~ : AnyRef = this.getId
 
 }
