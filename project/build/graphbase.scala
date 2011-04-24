@@ -91,6 +91,15 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     lazy val TempThrift = Repositories.TempThrift
     lazy val EaioRepository = Repositories.EaioRepository
 
+    override def pomExtra =
+      <licenses>
+        <license>
+          <name>Apache 2</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+
   }
 
   class BlueprintsProject(info: ProjectInfo) extends GraphbaseProject(info) {
@@ -166,14 +175,6 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
         </dependency>
       </dependencies>
 
-    override def pomExtra =
-      <licenses>
-        <license>
-          <name>Apache 2</name>
-          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
   }
 
   class DslProject(info: ProjectInfo) extends GraphbaseProject(info) {
