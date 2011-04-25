@@ -8,3 +8,5 @@ project/plugins/project/
 project/plugins/target/
 project/project.iml
 target/
+blueprints/graphbase-blueprints.iml
+dsl/graphbase-dsl.iml
