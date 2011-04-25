@@ -67,58 +67,19 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     val hbaseTest = "org.apache.hbase" % "hbase" % "0.90.1-cdh3u0" % "test" classifier "tests"
     val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
     val junit = "junit" % "junit" % "4.5" % "test"
-  }
-
-  class GraphbaseProject(info: ProjectInfo) extends DefaultProject(info) {
-
-    override def compileOptions = super.compileOptions ++ CompileSettings.scalaCompileSettings.map(CompileOption)
-
-    override def javaCompileOptions = super.javaCompileOptions ++ CompileSettings.javaCompileSettings.map(JavaCompileOption)
-
-    override def disableCrossPaths = true
-
-    override def managedStyle = ManagedStyle.Maven
-
-    override def defaultPublishRepository = Some(Resolver.file("Local", new File("../graphbase-pages/repository")))
-
-    // Repositories
-    lazy val scalaToolsSnapshots = Repositories.scalaToolsSnapshots
-    lazy val scalaToolsReleases = Repositories.scalaToolsReleases
-    lazy val SunRepository = Repositories.SunRepository
-    lazy val TinkerPopRepository = Repositories.TinkerPopRepository
-    lazy val ClouderaRepository = Repositories.ClouderaRepository
-    lazy val ClouderaRepository3RDParty = Repositories.ClouderaRepository3RDParty
-    lazy val TempThrift = Repositories.TempThrift
-    lazy val EaioRepository = Repositories.EaioRepository
-
-    override def pomExtra =
-      <licenses>
-        <license>
-          <name>Apache 2</name>
-          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
-
-  }
-
-  class BlueprintsProject(info: ProjectInfo) extends GraphbaseProject(info) {
-
-    // Dependencies
-    // Compile
-    lazy val tinkerpop = Dependencies.tinkerpop
-    lazy val eaio = Dependencies.eaio
-    lazy val zookeeper = Dependencies.zookeeper
-
-    // Test
-    lazy val hadoopTest = Dependencies.hadoopTest
-    lazy val hbaseTest = Dependencies.hbaseTest
-    lazy val scalatest = Dependencies.scalatest
-    lazy val junit = Dependencies.junit
-
-    // Compile
-    override def ivyXML =
+    val ivyXML =
       <dependencies>
+        <dependency org="com.tinkerpop" name="gremlin" rev="0.9" conf="compile">
+            <exclude org="org.openrdf.sesame"/>
+            <exclude org="net.fortytwo"/>
+            <exclude module="blueprints-sail-graph"/>
+            <exclude module="jansi"/>
+            <exclude module="jline"/>
+            <exclude module="junit"/>
+            <exclude module="log4j"/>
+            <exclude module="slf4j-api"/>
+            <exclude module="slf4j-log4j12"/>
+        </dependency>
         <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2-cdh3u0" conf="compile">
             <exclude module="commons-cli"/>
             <exclude module="xmlenc"/>
@@ -174,6 +135,58 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
             <exclude module="jasper-runtime"/>
         </dependency>
       </dependencies>
+
+  }
+
+  class GraphbaseProject(info: ProjectInfo) extends DefaultProject(info) {
+
+    override def compileOptions = super.compileOptions ++ CompileSettings.scalaCompileSettings.map(CompileOption)
+
+    override def javaCompileOptions = super.javaCompileOptions ++ CompileSettings.javaCompileSettings.map(JavaCompileOption)
+
+    override def disableCrossPaths = true
+
+    override def managedStyle = ManagedStyle.Maven
+
+    override def defaultPublishRepository = Some(Resolver.file("Local", new File("../graphbase-pages/repository")))
+
+    // Repositories
+    lazy val scalaToolsSnapshots = Repositories.scalaToolsSnapshots
+    lazy val scalaToolsReleases = Repositories.scalaToolsReleases
+    lazy val SunRepository = Repositories.SunRepository
+    lazy val TinkerPopRepository = Repositories.TinkerPopRepository
+    lazy val ClouderaRepository = Repositories.ClouderaRepository
+    lazy val ClouderaRepository3RDParty = Repositories.ClouderaRepository3RDParty
+    lazy val TempThrift = Repositories.TempThrift
+    lazy val EaioRepository = Repositories.EaioRepository
+
+    override def pomExtra =
+      <licenses>
+        <license>
+          <name>Apache 2</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+
+  }
+
+  class BlueprintsProject(info: ProjectInfo) extends GraphbaseProject(info) {
+
+    // Dependencies
+    // Compile
+    lazy val tinkerpop = Dependencies.tinkerpop
+    lazy val eaio = Dependencies.eaio
+    lazy val zookeeper = Dependencies.zookeeper
+
+    // Test
+    lazy val hadoopTest = Dependencies.hadoopTest
+    lazy val hbaseTest = Dependencies.hbaseTest
+    lazy val scalatest = Dependencies.scalatest
+    lazy val junit = Dependencies.junit
+
+    // Compile
+    override def ivyXML = Dependencies.ivyXML
 
   }
 

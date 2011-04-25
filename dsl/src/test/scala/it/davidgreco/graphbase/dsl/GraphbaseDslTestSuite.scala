@@ -214,6 +214,31 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
     }
   }
 
+  it("should perform some algorithm") {
+    var conf = HBaseConfiguration.create
+    conf.set("hbase.zookeeper.quorum", "localhost")
+    conf.set("hbase.zookeeper.property.clientPort", port)
+    val admin = new HBaseAdmin(conf)
+    val G = new graph(admin, "simple")
+
+    val v1 = G +=\/
+    val v2 = G +=\/
+    val v3 = G +=\/
+    val v4 = G +=\/
+    val v5 = G +=\/
+
+    val e1 =  G +=-- (v1, "e1", v2)
+    val e2 =  G +=-- (v1, "e2", v3)
+    val e3 =  G +=-- (v2, "e3", v3)
+    val e4 =  G +=-- (v2, "e4", v4)
+    val e5 =  G +=-- (v3, "e5", v2)
+    val e6 =  G +=-- (v3, "e6", v4)
+    val e7 =  G +=-- (v3, "e7", v5)
+    val e8 =  G +=-- (v4, "e8", v5)
+    val e9 =  G +=-- (v5, "e9", v4)
+    val e10 = G +=-- (v5, "e10", v1)
+  }
+
   def toString(id: AnyRef): String = Bytes.toString(id.asInstanceOf[Array[Byte]]);
 
 }

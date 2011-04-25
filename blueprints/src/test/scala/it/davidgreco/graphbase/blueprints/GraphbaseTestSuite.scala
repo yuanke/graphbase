@@ -21,10 +21,14 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{BeforeAndAfterEach, Spec}
 import org.junit.runner.RunWith
 import org.apache.hadoop.hbase.HBaseConfiguration
-import com.tinkerpop.blueprints.pgm.Graph
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.hadoop.hbase.util.Bytes
 import scala.collection.JavaConversions._
+import com.tinkerpop.gremlin.Gremlin
+import com.tinkerpop.pipes.Pipe
+import com.tinkerpop.blueprints.pgm.{Edge, Vertex, Graph}
+import java.util.{ArrayList, Arrays}
+import collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
 class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHbase {
@@ -315,6 +319,56 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
       assert(e2.getProperty("A_FLOAT") == null)
       assert(e2.getProperty("A_DOUBLE") == null)
       assert(e2.getProperty("A_BOOLEAN") == null)
+    }
+
+    it("should allow the usage of gremlin") {
+      var conf = HBaseConfiguration.create
+      conf.set("hbase.zookeeper.quorum", "localhost")
+      conf.set("hbase.zookeeper.property.clientPort", port)
+      val admin = new HBaseAdmin(conf)
+      val graph: Graph = new HBaseGraph(admin, "simple")
+
+      val v1 = graph.addVertex(null)
+      v1.setProperty("name", "v1")
+      v1.setProperty("age", 20)
+
+      val v2 = graph.addVertex(null)
+      v2.setProperty("name", "v2")
+      v2.setProperty("age", 40)
+
+      val v3 = graph.addVertex(null)
+      v3.setProperty("name", "v3")
+      v3.setProperty("age", 30)
+
+      val v4 = graph.addVertex(null)
+      v4.setProperty("name", "v4")
+
+      val v5 = graph.addVertex(null)
+      v5.setProperty("name", "v5")
+
+      val e1 = graph.addEdge(null, v1, v2, "knows")
+      val e2 = graph.addEdge(null, v1, v3, "knows")
+      val e3 = graph.addEdge(null, v2, v3, "knows")
+      val e4 = graph.addEdge(null, v2, v4, "knows")
+      val e5 = graph.addEdge(null, v3, v2, "knows")
+      val e6 = graph.addEdge(null, v3, v4, "knows")
+      val e7 = graph.addEdge(null, v3, v5, "knows")
+      val e8 = graph.addEdge(null, v4, v5, "knows")
+      val e9 = graph.addEdge(null, v5, v4, "knows")
+      val e10 = graph.addEdge(null, v5, v1, "knows")
+
+      val pipe: Pipe[Vertex, String] = Gremlin.compile("_().outE{it.label=='knows'}.inV{it.age > 30}.name").asInstanceOf[Pipe[Vertex, String]]
+      val starts = new ArrayList[Vertex];
+      starts.add(graph.getVertex(v1.getId))
+      pipe.setStarts(starts)
+
+      val l = new ListBuffer[String]
+      val it = pipe.iterator
+      while(it.hasNext) {
+          val i = it.next
+          l += i
+      }
+      assert(l.toSet == Set("v2"))
     }
   }
 
