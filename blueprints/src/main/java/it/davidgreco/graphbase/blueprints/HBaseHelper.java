@@ -34,8 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 class HBaseHelper {
 
     private final HBaseAdmin admin;
-    private final String vname;
-    private final String ivname;
     final String ivnameClass;
     private final String ivnameProperties;
     final String vnameProperties;
@@ -52,8 +50,8 @@ class HBaseHelper {
 
     HBaseHelper(HBaseAdmin admin, String name) {
         this.admin = admin;
-        this.vname = name;
-        this.ivname = name + "_indexes";
+        String vname = name;
+        String ivname = name + "_indexes";
         this.ivnameClass = ivname + "_class";
         this.ivnameProperties = ivname + "_properties";
         this.vnameProperties = vname + "_properties";

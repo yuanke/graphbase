@@ -21,16 +21,16 @@ import org.scalatest.{BeforeAndAfterEach, Spec}
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.util.Bytes
-import it.davidgreco.graphbase.blueprints.EmbeddedHbase
+import it.davidgreco.graphbase.blueprints.EmbeddedHBase
 
-class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHbase {
+class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHBase {
 
   val port = "21818"
 
   describe("A graph") {
 
     it("should create and retrieve vertexes") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -44,7 +44,7 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
     }
 
     it("should add and retrieve vertex properties") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -72,7 +72,7 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
     }
 
     it("should remove vertexes") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -86,7 +86,7 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
     }
 
     it("should remove vertex properties") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -100,7 +100,7 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
     }
 
     it("should complain on non supported property type") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -114,7 +114,7 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
     }
 
     it("should create and retrieve edges") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -133,7 +133,7 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
     }
 
     it("should create and retrieve edge properties") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -163,7 +163,7 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
     }
 
     it("should remove edge properties") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -180,7 +180,7 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
     }
 
     it("should remove edges") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -215,7 +215,7 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
   }
 
   it("should perform some algorithm") {
-    var conf = HBaseConfiguration.create
+    val conf = HBaseConfiguration.create
     conf.set("hbase.zookeeper.quorum", "localhost")
     conf.set("hbase.zookeeper.property.clientPort", port)
     val admin = new HBaseAdmin(conf)
@@ -227,15 +227,15 @@ class GraphbaseDslTestSuite extends Spec with ShouldMatchers with BeforeAndAfter
     val v4 = G +=\/
     val v5 = G +=\/
 
-    val e1 =  G +=-- (v1, "e1", v2)
-    val e2 =  G +=-- (v1, "e2", v3)
-    val e3 =  G +=-- (v2, "e3", v3)
-    val e4 =  G +=-- (v2, "e4", v4)
-    val e5 =  G +=-- (v3, "e5", v2)
-    val e6 =  G +=-- (v3, "e6", v4)
-    val e7 =  G +=-- (v3, "e7", v5)
-    val e8 =  G +=-- (v4, "e8", v5)
-    val e9 =  G +=-- (v5, "e9", v4)
+    val e1 = G +=-- (v1, "e1", v2)
+    val e2 = G +=-- (v1, "e2", v3)
+    val e3 = G +=-- (v2, "e3", v3)
+    val e4 = G +=-- (v2, "e4", v4)
+    val e5 = G +=-- (v3, "e5", v2)
+    val e6 = G +=-- (v3, "e6", v4)
+    val e7 = G +=-- (v3, "e7", v5)
+    val e8 = G +=-- (v4, "e8", v5)
+    val e9 = G +=-- (v5, "e9", v4)
     val e10 = G +=-- (v5, "e10", v1)
   }
 

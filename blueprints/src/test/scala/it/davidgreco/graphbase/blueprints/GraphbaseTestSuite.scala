@@ -26,19 +26,19 @@ import org.apache.hadoop.hbase.util.Bytes
 import scala.collection.JavaConversions._
 import com.tinkerpop.gremlin.Gremlin
 import com.tinkerpop.pipes.Pipe
-import com.tinkerpop.blueprints.pgm.{Edge, Vertex, Graph}
-import java.util.{ArrayList, Arrays}
+import com.tinkerpop.blueprints.pgm.{Vertex, Graph}
+import java.util.ArrayList
 import collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
-class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHbase {
+class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHBase {
 
   val port = "21818"
 
   describe("A graph") {
 
     it("should create and retrieve vertexes") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -52,7 +52,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should add and retrieve vertex properties") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -78,7 +78,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should remove vertexes") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -91,7 +91,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should remove vertex properties") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -104,7 +104,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should complain on non supported property type") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -118,7 +118,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should create and retrieve edges") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -193,7 +193,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should create and retrieve edge properties") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -241,7 +241,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should remove edge properties") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -256,7 +256,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should remove edges") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -322,7 +322,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should allow the usage of gremlin") {
-      var conf = HBaseConfiguration.create
+      val conf = HBaseConfiguration.create
       conf.set("hbase.zookeeper.quorum", "localhost")
       conf.set("hbase.zookeeper.property.clientPort", port)
       val admin = new HBaseAdmin(conf)
@@ -364,9 +364,9 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
 
       val l = new ListBuffer[String]
       val it = pipe.iterator
-      while(it.hasNext) {
-          val i = it.next
-          l += i
+      while (it.hasNext) {
+        val i = it.next
+        l += i
       }
       assert(l.toSet == Set("v2"))
     }

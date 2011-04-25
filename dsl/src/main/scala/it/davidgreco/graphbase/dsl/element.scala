@@ -28,7 +28,7 @@ class element[A, T <: {
 
   def getId: AnyRef = e.getId
 
-  def setProperty[P](prop: Tuple2[String, P]): A = {
+  def setProperty[P](prop: (String, P)): A = {
     e.setProperty(prop._1, prop._2.asInstanceOf[AnyRef])
     this.asInstanceOf[A]
   }
@@ -46,7 +46,7 @@ class element[A, T <: {
   /**
    * It sets a property
    */
-  def p_<-[P](prop: Tuple2[String, P]) = setProperty(prop)
+  def p_<-[P](prop: (String, P)) = setProperty(prop)
 
   /**
    * It gets a property

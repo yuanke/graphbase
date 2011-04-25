@@ -24,7 +24,7 @@ import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.util.Bytes
 import com.tinkerpop.blueprints.pgm.{Edge, Vertex, IndexableGraph}
 
-class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHbase {
+class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEach with EmbeddedHBase {
 
   val port = "21818"
 

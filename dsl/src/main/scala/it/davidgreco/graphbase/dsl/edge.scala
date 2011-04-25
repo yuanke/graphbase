@@ -16,7 +16,7 @@
  */
 package it.davidgreco.graphbase.dsl
 
-import com.tinkerpop.blueprints.pgm.{Edge, Vertex, Graph}
+import com.tinkerpop.blueprints.pgm.Edge
 
 class edge(val edge: Edge) extends element[edge, Edge](edge) {
 

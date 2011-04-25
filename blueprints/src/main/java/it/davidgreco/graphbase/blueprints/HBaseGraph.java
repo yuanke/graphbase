@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class HBaseGraph implements Graph, IndexableGraph {
 
-    final HBaseHelper        handle;
+    final HBaseHelper handle;
     final Map<String, Index> indices;
 
     public HBaseGraph(HBaseAdmin admin, String name) {
@@ -254,7 +254,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
             }
 
             if (!c.isAssignableFrom(indexClass))
-                    throw new RuntimeException("Stored index is " + c + " and is being loaded as a " + indexClass + " index");
+                throw new RuntimeException("Stored index is " + c + " and is being loaded as a " + indexClass + " index");
 
             ConcurrentHashMap<String, HBaseHelper.IndexTableStruct> indexTables = handle.getAutomaticIndexTables(indexName);
             HBaseIndex<T> index = new HBaseIndex<T>(this, indexName, c, indexTables);

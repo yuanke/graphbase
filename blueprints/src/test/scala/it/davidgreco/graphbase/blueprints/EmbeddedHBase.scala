@@ -18,16 +18,18 @@ package it.davidgreco.graphbase.blueprints
 
 import org.scalatest.{Suite, BeforeAndAfterAll}
 import org.apache.hadoop.hbase.HBaseTestingUtility
-trait EmbeddedHbase extends BeforeAndAfterAll {
+
+trait EmbeddedHBase extends BeforeAndAfterAll {
   this: Suite =>
 
   val testUtil = new HBaseTestingUtility
 
-  override protected def beforeAll(): Unit = {
+  override protected def beforeAll() {
     testUtil.startMiniCluster
   }
 
-  override protected def afterAll(): Unit = {
-    testUtil.shutdownMiniCluster
+  override protected def afterAll() {
+    testUtil.shutdownMiniCluster()
   }
+
 }

@@ -20,7 +20,7 @@ import sbt._
 
 class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
 
-  def doNothing = task {
+  def doNothing() = task {
     None
   }
 

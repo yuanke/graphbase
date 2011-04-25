@@ -31,7 +31,7 @@ import java.util.TreeSet;
 
 class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
 
-    private HBaseGraph graph;
+    private final HBaseGraph graph;
     private byte[] id;
     private HBaseVertex outVertex;
     private HBaseVertex inVertex;
