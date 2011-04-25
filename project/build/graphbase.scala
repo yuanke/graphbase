@@ -67,18 +67,14 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     val hbaseTest = "org.apache.hbase" % "hbase" % "0.90.1-cdh3u0" % "test" classifier "tests"
     val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
     val junit = "junit" % "junit" % "4.5" % "test"
+
+    // Compile & Test
     val ivyXML =
       <dependencies>
-        <dependency org="com.tinkerpop" name="gremlin" rev="0.9" conf="compile">
+        <dependency org="com.tinkerpop" name="gremlin" rev="0.9" conf="test">
             <exclude org="org.openrdf.sesame"/>
             <exclude org="net.fortytwo"/>
             <exclude module="blueprints-sail-graph"/>
-            <exclude module="jansi"/>
-            <exclude module="jline"/>
-            <exclude module="junit"/>
-            <exclude module="log4j"/>
-            <exclude module="slf4j-api"/>
-            <exclude module="slf4j-log4j12"/>
         </dependency>
         <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2-cdh3u0" conf="compile">
             <exclude module="commons-cli"/>
