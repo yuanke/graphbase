@@ -18,6 +18,8 @@ package it.davidgreco.graphbase.blueprints;
 
 import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.Vertex;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -159,6 +161,30 @@ class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
 
     void setLabel(String label) {
         this.label = label;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        HBaseEdge rhs = (HBaseEdge) obj;
+        return new EqualsBuilder()
+                .append(id, rhs.id)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(99, 33)
+                .append(id)
+                .toHashCode();
     }
 
 }

@@ -18,6 +18,8 @@ package it.davidgreco.graphbase.blueprints;
 
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -174,7 +176,9 @@ class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             Set<String> keys = new TreeSet<String>();
             Set<byte[]> bkeys = familyMap.keySet();
             for (byte[] bkey : bkeys) {
-                keys.add(Bytes.toString(bkey));
+                if (bkey.length != 0) {
+                    keys.add(Bytes.toString(bkey));
+                }
             }
             return keys;
         } catch (IOException e) {
@@ -237,6 +241,30 @@ class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
 
     void setGraph(HBaseGraph graph) {
         this.graph = graph;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        HBaseVertex rhs = (HBaseVertex) obj;
+        return new EqualsBuilder()
+                .append(id, rhs.id)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(99, 33)
+                .append(id)
+                .toHashCode();
     }
 
 }

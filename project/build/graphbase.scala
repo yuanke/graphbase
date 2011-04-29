@@ -58,15 +58,17 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
   // Dependencies
   object Dependencies {
     // Compile
-    val tinkerpop = "com.tinkerpop.blueprints" % "blueprints-core" % "0.6" intransitive
+    val blueprints = "com.tinkerpop.blueprints" % "blueprints-core" % "0.6" intransitive
     val zookeeper = "org.apache.zookeeper" % "zookeeper" % "3.3.3-cdh3u0"
     val eaio = "com.eaio.uuid" % "uuid" % "3.2"
+    val commonsLang = "commons-lang" % "commons-lang" % "2.6"
 
     // Test
     val hadoopTest = "org.apache.hadoop" % "hadoop-test" % "0.20.2-cdh3u0" % "test"
     val hbaseTest = "org.apache.hbase" % "hbase" % "0.90.1-cdh3u0" % "test" classifier "tests"
     val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
     val junit = "junit" % "junit" % "4.5" % "test"
+    val blueprintsTest = "com.tinkerpop" % "blueprints-tests" % "0.5" % "test" intransitive
 
     // Compile & Test
     val ivyXML =
@@ -171,15 +173,17 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
 
     // Dependencies
     // Compile
-    lazy val tinkerpop = Dependencies.tinkerpop
+    lazy val blueprints = Dependencies.blueprints
     lazy val eaio = Dependencies.eaio
     lazy val zookeeper = Dependencies.zookeeper
+    lazy val commonsLang = Dependencies.commonsLang
 
     // Test
     lazy val hadoopTest = Dependencies.hadoopTest
     lazy val hbaseTest = Dependencies.hbaseTest
     lazy val scalatest = Dependencies.scalatest
     lazy val junit = Dependencies.junit
+    lazy val blueprintsTest = Dependencies.blueprintsTest
 
     // Compile
     override def ivyXML = Dependencies.ivyXML
@@ -190,8 +194,13 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
 
   }
 
+  class MapReduceProject(info: ProjectInfo) extends GraphbaseProject(info) {
+
+  }
+
   // Subprojects
   lazy val blueprints = project("blueprints", "graphbase-blueprints", new BlueprintsProject(_))
   lazy val dsl = project("dsl", "graphbase-dsl", new DslProject(_), blueprints)
+  lazy val mapreduce = project("mapreduce", "graphbase-mapreduce", new MapReduceProject(_), dsl)
 
 }

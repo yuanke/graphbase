@@ -101,7 +101,7 @@ class graph(val admin: HBaseAdmin, val name: String) {
   def VI_+=\/(name: String, props: List[String]) = addVertexIndex(name, props.toSet)
 
   /**
-   * It adds an index for edges
+   * It adds an automatic index for edges
    */
   def EI_+=--(name: String, props: List[String]) = addEdgeIndex(name, props.toSet)
 

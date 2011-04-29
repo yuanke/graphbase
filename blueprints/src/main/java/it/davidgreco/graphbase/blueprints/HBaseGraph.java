@@ -75,6 +75,14 @@ public class HBaseGraph implements Graph, IndexableGraph {
     @Override
     public void removeVertex(Vertex vertex) {
         try {
+            Iterable<Edge> outEdges = vertex.getOutEdges();
+            for(Edge e: outEdges) {
+                this.removeEdge(e);
+            }
+            Iterable<Edge> inEdges = vertex.getInEdges();
+            for(Edge e: inEdges) {
+                this.removeEdge(e);
+            }
             Delete delete = new Delete((byte[]) vertex.getId());
             handle.vtable.delete(delete);
         } catch (IOException e) {
@@ -85,6 +93,27 @@ public class HBaseGraph implements Graph, IndexableGraph {
     @Override
     public Iterable<Vertex> getVertices() {
         throw new RuntimeException("Not supported");
+    }
+
+    private Iterable<Vertex> getAllVertices() {
+        ResultScanner vscanner = null;
+        try {
+            List<Vertex> vertices = new ArrayList<Vertex>();
+            Scan vscan = new Scan();
+            vscanner = handle.vtable.getScanner(vscan);
+            for (Result res : vscanner) {
+                byte[] id = res.getRow();
+                HBaseVertex vertex = new HBaseVertex();
+                vertex.setGraph(this);
+                vertex.setId(id);
+                vertices.add(vertex);
+            }
+            return vertices;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            vscanner.close();
+        }
     }
 
     @Override
@@ -211,14 +240,49 @@ public class HBaseGraph implements Graph, IndexableGraph {
         throw new RuntimeException("Not supported");
     }
 
+    private Iterable<Edge> getAllEdges() {
+        ResultScanner vscanner = null;
+        try {
+            List<Edge> edges = new ArrayList<Edge>();
+            Scan vscan = new Scan();
+            vscanner = handle.vtable.getScanner(vscan);
+            for (Result res : vscanner) {
+                byte[] id = res.getRow();
+                HBaseVertex vertex = new HBaseVertex();
+                vertex.setGraph(this);
+                vertex.setId(id);
+                Iterable<Edge> outEdges = vertex.getOutEdges();
+                for (Edge e : outEdges) {
+                    edges.add(e);
+                }
+            }
+            return edges;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            vscanner.close();
+        }
+    }
+
     @Override
     public void clear() {
-        throw new RuntimeException("Not supported");
+        Iterable<Vertex> vertices = getAllVertices();
+        Iterable<Edge> edges = getAllEdges();
+        for (Vertex v : vertices) {
+            removeVertex(v);
+        }
+        for (Edge e : edges) {
+            removeEdge(e);
+        }
+        Iterable<Index<? extends Element>> indices = getIndices();
+        for (Index i : indices) {
+            dropIndex(i.getIndexName());
+        }
     }
 
     @Override
     public void shutdown() {
-        throw new RuntimeException("Not supported");
+        //throw new RuntimeException("Not supported");
     }
 
     @Override
@@ -241,7 +305,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
             Get get = new Get(Bytes.toBytes(indexName));
             Result res = handle.ivtable.get(get);
             if (res.isEmpty()) {
-                throw new RuntimeException("An index with this name " + indexName + " does not exist");
+                throw new RuntimeException("An index with this name: " + indexName + ", does not exist");
             }
             String clazz = Bytes.toString(res.getValue(Bytes.toBytes(handle.ivnameClass), null));
             Class c;
