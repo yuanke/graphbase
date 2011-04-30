@@ -76,12 +76,16 @@ public class HBaseGraph implements Graph, IndexableGraph {
     public void removeVertex(Vertex vertex) {
         try {
             Iterable<Edge> outEdges = vertex.getOutEdges();
-            for(Edge e: outEdges) {
+            for (Edge e : outEdges) {
                 this.removeEdge(e);
             }
             Iterable<Edge> inEdges = vertex.getInEdges();
-            for(Edge e: inEdges) {
+            for (Edge e : inEdges) {
                 this.removeEdge(e);
+            }
+            Set<String> keys = vertex.getPropertyKeys();
+            for (String k : keys) {
+                vertex.removeProperty(k);
             }
             Delete delete = new Delete((byte[]) vertex.getId());
             handle.vtable.delete(delete);
@@ -213,6 +217,10 @@ public class HBaseGraph implements Graph, IndexableGraph {
             Get gIn = new Get(inVertexId);
             Result resultIn = handle.vtable.get(gIn);
             if (!resultIn.isEmpty() && !resultOut.isEmpty()) {
+                Set<String> keys = edge.getPropertyKeys();
+                for (String k : keys) {
+                    edge.removeProperty(k);
+                }
                 Util.EdgeIdStruct struct = Util.getEdgeIdStruct((byte[]) edge.getId());
                 Delete delete = new Delete(gOut.getRow());
                 delete.deleteColumns(Bytes.toBytes(handle.vnameOutEdges), struct.edgeLocalId);
@@ -237,7 +245,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public Iterable<Edge> getEdges() {
-        throw new RuntimeException("Not supported");
+        throw new UnsupportedOperationException();
     }
 
     private Iterable<Edge> getAllEdges() {
@@ -271,9 +279,6 @@ public class HBaseGraph implements Graph, IndexableGraph {
         for (Vertex v : vertices) {
             removeVertex(v);
         }
-        for (Edge e : edges) {
-            removeEdge(e);
-        }
         Iterable<Index<? extends Element>> indices = getIndices();
         for (Index i : indices) {
             dropIndex(i.getIndexName());
@@ -282,12 +287,11 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public void shutdown() {
-        //throw new RuntimeException("Not supported");
     }
 
     @Override
     public <T extends Element> Index<T> createManualIndex(String indexName, Class<T> indexClass) {
-        throw new RuntimeException("Not supported");
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -305,7 +309,7 @@ public class HBaseGraph implements Graph, IndexableGraph {
             Get get = new Get(Bytes.toBytes(indexName));
             Result res = handle.ivtable.get(get);
             if (res.isEmpty()) {
-                throw new RuntimeException("An index with this name: " + indexName + ", does not exist");
+                return null;
             }
             String clazz = Bytes.toString(res.getValue(Bytes.toBytes(handle.ivnameClass), null));
             Class c;

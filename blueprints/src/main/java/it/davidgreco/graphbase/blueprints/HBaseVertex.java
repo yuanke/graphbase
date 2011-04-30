@@ -193,13 +193,20 @@ class HBaseVertex implements com.tinkerpop.blueprints.pgm.Vertex {
             byte[] bvalue = Util.typedObjectToBytes(value);
             Put put = new Put(id);
             put.add(Bytes.toBytes(graph.handle.vnameProperties), Bytes.toBytes(key), bvalue);
-
+            boolean res = graph.handle.vtable.checkAndPut(id, Bytes.toBytes(graph.handle.vnameProperties), Bytes.toBytes(key), null, put);
+            if (!res) {
+                //I remove the old property from the index
+                Object oldValue = this.getProperty(key);
+                //Automatic indices update
+                for (Index e : graph.indices.values()) {
+                    e.remove(key, oldValue, this);
+                }
+                graph.handle.vtable.put(put);
+            }
             //Automatic indices update
             for (Index e : graph.indices.values()) {
                 e.put(key, value, this);
             }
-            //
-            graph.handle.vtable.put(put);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

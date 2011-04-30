@@ -104,13 +104,20 @@ class HBaseEdge implements com.tinkerpop.blueprints.pgm.Edge {
             Util.EdgeIdStruct struct = Util.getEdgeIdStruct(id);
             Put put = new Put(struct.vertexId);
             put.add(Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId), bvalue);
-
+            boolean res = graph.handle.vtable.checkAndPut(struct.vertexId, Bytes.toBytes(graph.handle.vnameEdgeProperties), Util.generateEdgePropertyId(key, struct.edgeLocalId), null, put);
+            if (!res) {
+                //I remove the old property from the index
+                Object oldValue = this.getProperty(key);
+                //Automatic indices update
+                for (Index e : graph.indices.values()) {
+                    e.remove(key, oldValue, this);
+                }
+                graph.handle.vtable.put(put);
+            }
             //Automatic indices update
             for (Index e : graph.indices.values()) {
                 e.put(key, value, this);
             }
-            //
-            graph.handle.vtable.put(put);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
