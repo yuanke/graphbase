@@ -8,6 +8,9 @@ import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -17,6 +20,7 @@ public class BlueprintsGraphbaseTestSuite extends GraphTest {
     private HBaseTestingUtility testUtil = new HBaseTestingUtility();
     private IndexableGraph graph;
 
+    @BeforeClass
     public void setUp() throws Exception {
         testUtil.startMiniCluster();
         Configuration conf = HBaseConfiguration.create();
@@ -33,6 +37,7 @@ public class BlueprintsGraphbaseTestSuite extends GraphTest {
         graph = (IndexableGraph) new HBaseGraph(admin, "simple");
     }
 
+    @AfterClass
     public void tearDown() throws IOException {
         testUtil.shutdownMiniCluster();
     }
@@ -50,24 +55,28 @@ public class BlueprintsGraphbaseTestSuite extends GraphTest {
         this.supportsTransactions = false;
     }
 
+    @Test
     public void testVertexTestSuite() throws Exception {
         this.stopWatch();
         doTestSuite(new VertexTestSuite(this));
         printTestPerformance("VertexTestSuite", this.stopWatch());
     }
 
+    @Test
     public void testEdgeTestSuite() throws Exception {
         this.stopWatch();
         doTestSuite(new EdgeTestSuite(this));
         printTestPerformance("EdgeTestSuite", this.stopWatch());
     }
 
+    @Test
     public void testGraphTestSuite() throws Exception {
         this.stopWatch();
         doTestSuite(new GraphTestSuite(this));
         printTestPerformance("GraphTestSuite", this.stopWatch());
     }
 
+    @Test
     public void testAutomaticIndexTestSuite() throws Exception {
         this.stopWatch();
         doTestSuite(new AutomaticIndexTestSuite(this));

@@ -68,6 +68,7 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     val hbaseTest = "org.apache.hbase" % "hbase" % "0.90.1-cdh3u0" % "test" classifier "tests"
     val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
     val junit = "junit" % "junit" % "4.5" % "test"
+    val junitInterface = "com.novocode" % "junit-interface" % "0.6" % "test->default"
     val blueprintsTest = "com.tinkerpop" % "blueprints-tests" % "0.5" % "test" intransitive
 
     // Compile & Test
@@ -183,6 +184,7 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     lazy val hbaseTest = Dependencies.hbaseTest
     lazy val scalatest = Dependencies.scalatest
     lazy val junit = Dependencies.junit
+    lazy val junitInterface = Dependencies.junitInterface
     lazy val blueprintsTest = Dependencies.blueprintsTest
 
     // Compile
