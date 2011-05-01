@@ -99,27 +99,6 @@ public class HBaseGraph implements Graph, IndexableGraph {
         throw new RuntimeException("Not supported");
     }
 
-    private Iterable<Vertex> getAllVertices() {
-        ResultScanner vscanner = null;
-        try {
-            List<Vertex> vertices = new ArrayList<Vertex>();
-            Scan vscan = new Scan();
-            vscanner = handle.vtable.getScanner(vscan);
-            for (Result res : vscanner) {
-                byte[] id = res.getRow();
-                HBaseVertex vertex = new HBaseVertex();
-                vertex.setGraph(this);
-                vertex.setId(id);
-                vertices.add(vertex);
-            }
-            return vertices;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            vscanner.close();
-        }
-    }
-
     @Override
     public Edge addEdge(Object o, Vertex outVertex, Vertex inVertex, String label) {
         RowLock lockOut = null;
@@ -248,10 +227,10 @@ public class HBaseGraph implements Graph, IndexableGraph {
         throw new UnsupportedOperationException();
     }
 
-    private Iterable<Edge> getAllEdges() {
+    @Override
+    public void clear() {
         ResultScanner vscanner = null;
         try {
-            List<Edge> edges = new ArrayList<Edge>();
             Scan vscan = new Scan();
             vscanner = handle.vtable.getScanner(vscan);
             for (Result res : vscanner) {
@@ -259,29 +238,18 @@ public class HBaseGraph implements Graph, IndexableGraph {
                 HBaseVertex vertex = new HBaseVertex();
                 vertex.setGraph(this);
                 vertex.setId(id);
-                Iterable<Edge> outEdges = vertex.getOutEdges();
-                for (Edge e : outEdges) {
-                    edges.add(e);
-                }
+                this.removeVertex(vertex);
             }
-            return edges;
+            Iterable<Index<? extends Element>> indices = getIndices();
+            for (Index i : indices) {
+                dropIndex(i.getIndexName());
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            vscanner.close();
-        }
-    }
-
-    @Override
-    public void clear() {
-        Iterable<Vertex> vertices = getAllVertices();
-        Iterable<Edge> edges = getAllEdges();
-        for (Vertex v : vertices) {
-            removeVertex(v);
-        }
-        Iterable<Index<? extends Element>> indices = getIndices();
-        for (Index i : indices) {
-            dropIndex(i.getIndexName());
+            if (vscanner != null) {
+                vscanner.close();
+            }
         }
     }
 
