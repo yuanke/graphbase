@@ -192,17 +192,11 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
 
   }
 
-  class DslProject(info: ProjectInfo) extends GraphbaseProject(info) {
-
-  }
-
   class MapReduceProject(info: ProjectInfo) extends GraphbaseProject(info) {
 
   }
 
   // Subprojects
   lazy val blueprints = project("blueprints", "graphbase-blueprints", new BlueprintsProject(_))
-  lazy val dsl = project("dsl", "graphbase-dsl", new DslProject(_), blueprints)
-  lazy val mapreduce = project("mapreduce", "graphbase-mapreduce", new MapReduceProject(_), dsl)
 
 }
