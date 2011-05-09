@@ -4,7 +4,7 @@
     <groupId>it.davidgreco.graphbase</groupId>
     <artifactId>graphbase-blueprints</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <licenses>
         <license>
             <name>Apache 2</name>
@@ -16,13 +16,31 @@
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-core</artifactId>
-            <version>0.20.2-CDH3B4</version>
+            <version>0.20.2-cdh3u0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase</artifactId>
-            <version>0.90.1-CDH3B4</version>
+            <version>0.90.1-cdh3u0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tinkerpop.blueprints</groupId>
+            <artifactId>blueprints-core</artifactId>
+            <version>0.6</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.3.3-cdh3u0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -31,14 +49,23 @@
             <version>3.2</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.tinkerpop</groupId>
-            <artifactId>blueprints</artifactId>
-            <version>0.5</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
     <repositories>
+        <repository>
+            <id>ClouderaRepository</id>
+            <name>Cloudera Repository</name>
+            <url>https://repository.cloudera.com/content/groups/cloudera-repos/</url>
+        </repository>
+        <repository>
+            <id>ScalaToolsSnapshots</id>
+            <name>Scala Tools Snapshots</name>
+            <url>http://scala-tools.org/repo-snapshots/</url>
+        </repository>
+        <repository>
+            <id>EaioUUIDlibraryRepository</id>
+            <name>Eaio UUID library Repository</name>
+            <url>http://eaio.com/maven2/</url>
+        </repository>
         <repository>
             <id>ScalaToolsReleases</id>
             <name>Scala Tools Releases</name>
@@ -48,21 +75,6 @@
             <id>SunRepository</id>
             <name>Sun Repository</name>
             <url>http://download.java.net/maven/2/</url>
-        </repository>
-        <repository>
-            <id>ScalaToolsSnapshots</id>
-            <name>Scala Tools Snapshots</name>
-            <url>http://scala-tools.org/repo-snapshots/</url>
-        </repository>
-        <repository>
-            <id>TinkerPopRepository</id>
-            <name>TinkerPop Repository</name>
-            <url>http://tinkerpop.com/maven2/</url>
-        </repository>
-        <repository>
-            <id>ClouderaRepository</id>
-            <name>Cloudera Repository</name>
-            <url>https://repository.cloudera.com/content/groups/cloudera-repos/</url>
         </repository>
         <repository>
             <id>TemporaryThriftRepository</id>
@@ -75,9 +87,9 @@
             <url>https://repository.cloudera.com/content/repositories/third-party/</url>
         </repository>
         <repository>
-            <id>EaioUUIDlibraryRepository</id>
-            <name>Eaio UUID library Repository</name>
-            <url>http://eaio.com/maven2/</url>
+            <id>TinkerPopRepository</id>
+            <name>TinkerPop Repository</name>
+            <url>http://tinkerpop.com/maven2/</url>
         </repository>
         <repository>
             <id>ScalaToolsMaven2Repository</id>
