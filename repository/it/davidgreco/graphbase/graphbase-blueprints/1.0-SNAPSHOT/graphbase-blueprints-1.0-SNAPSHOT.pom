@@ -98,6 +98,14 @@
                     <groupId>org.eclipse.jdt</groupId>
                     <artifactId>core</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-mapper-asl</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -216,12 +224,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>com.tinkerpop.blueprints</groupId>
             <artifactId>blueprints-core</artifactId>
             <version>0.6</version>
@@ -239,6 +241,12 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>com.eaio.uuid</groupId>
             <artifactId>uuid</artifactId>
             <version>3.2</version>
@@ -246,31 +254,6 @@
         </dependency>
     </dependencies>
     <repositories>
-        <repository>
-            <id>TemporaryThriftRepository</id>
-            <name>Temporary Thrift Repository</name>
-            <url>http://people.apache.org/~rawson/repo/</url>
-        </repository>
-        <repository>
-            <id>EaioUUIDlibraryRepository</id>
-            <name>Eaio UUID library Repository</name>
-            <url>http://eaio.com/maven2/</url>
-        </repository>
-        <repository>
-            <id>ScalaToolsReleases</id>
-            <name>Scala Tools Releases</name>
-            <url>http://scala-tools.org/repo-releases/</url>
-        </repository>
-        <repository>
-            <id>ClouderaRepository</id>
-            <name>Cloudera Repository</name>
-            <url>https://repository.cloudera.com/content/groups/cloudera-repos/</url>
-        </repository>
-        <repository>
-            <id>TinkerPopRepository</id>
-            <name>TinkerPop Repository</name>
-            <url>http://tinkerpop.com/maven2/</url>
-        </repository>
         <repository>
             <id>ScalaToolsSnapshots</id>
             <name>Scala Tools Snapshots</name>
@@ -282,9 +265,34 @@
             <url>http://download.java.net/maven/2/</url>
         </repository>
         <repository>
+            <id>TemporaryThriftRepository</id>
+            <name>Temporary Thrift Repository</name>
+            <url>http://people.apache.org/~rawson/repo/</url>
+        </repository>
+        <repository>
+            <id>ClouderaRepository</id>
+            <name>Cloudera Repository</name>
+            <url>https://repository.cloudera.com/content/groups/cloudera-repos/</url>
+        </repository>
+        <repository>
+            <id>EaioUUIDlibraryRepository</id>
+            <name>Eaio UUID library Repository</name>
+            <url>http://eaio.com/maven2/</url>
+        </repository>
+        <repository>
             <id>ClouderaRepositoryThirdParty</id>
             <name>Cloudera Repository Third Party</name>
             <url>https://repository.cloudera.com/content/repositories/third-party/</url>
+        </repository>
+        <repository>
+            <id>TinkerPopRepository</id>
+            <name>TinkerPop Repository</name>
+            <url>http://tinkerpop.com/maven2/</url>
+        </repository>
+        <repository>
+            <id>ScalaToolsReleases</id>
+            <name>Scala Tools Releases</name>
+            <url>http://scala-tools.org/repo-releases/</url>
         </repository>
         <repository>
             <id>ScalaToolsMaven2Repository</id>
