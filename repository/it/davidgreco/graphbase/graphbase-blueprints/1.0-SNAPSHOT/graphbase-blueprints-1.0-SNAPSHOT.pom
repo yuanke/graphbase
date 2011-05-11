@@ -75,6 +75,14 @@
                     <artifactId>servlet-api-2.5</artifactId>
                 </exclusion>
                 <exclusion>
+                    <groupId>javax.servlet.jsp</groupId>
+                    <artifactId>jsp-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>net.sf.kosmosfs</groupId>
                     <artifactId>kfs</artifactId>
                 </exclusion>
@@ -108,10 +116,6 @@
                 <exclusion>
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>log4j</groupId>
@@ -212,6 +216,12 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>com.eaio.uuid</groupId>
+            <artifactId>uuid</artifactId>
+            <version>3.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
             <version>3.3.3-cdh3u0</version>
@@ -227,55 +237,19 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>com.tinkerpop.blueprints</groupId>
             <artifactId>blueprints-core</artifactId>
             <version>0.6</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.eaio.uuid</groupId>
-            <artifactId>uuid</artifactId>
-            <version>3.2</version>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
     <repositories>
-        <repository>
-            <id>ScalaToolsReleases</id>
-            <name>Scala Tools Releases</name>
-            <url>http://scala-tools.org/repo-releases/</url>
-        </repository>
-        <repository>
-            <id>EaioUUIDlibraryRepository</id>
-            <name>Eaio UUID library Repository</name>
-            <url>http://eaio.com/maven2/</url>
-        </repository>
-        <repository>
-            <id>ScalaToolsSnapshots</id>
-            <name>Scala Tools Snapshots</name>
-            <url>http://scala-tools.org/repo-snapshots/</url>
-        </repository>
-        <repository>
-            <id>TinkerPopRepository</id>
-            <name>TinkerPop Repository</name>
-            <url>http://tinkerpop.com/maven2/</url>
-        </repository>
-        <repository>
-            <id>ClouderaRepository</id>
-            <name>Cloudera Repository</name>
-            <url>https://repository.cloudera.com/content/groups/cloudera-repos/</url>
-        </repository>
-        <repository>
-            <id>SunRepository</id>
-            <name>Sun Repository</name>
-            <url>http://download.java.net/maven/2/</url>
-        </repository>
         <repository>
             <id>ClouderaRepositoryThirdParty</id>
             <name>Cloudera Repository Third Party</name>
@@ -285,6 +259,36 @@
             <id>TemporaryThriftRepository</id>
             <name>Temporary Thrift Repository</name>
             <url>http://people.apache.org/~rawson/repo/</url>
+        </repository>
+        <repository>
+            <id>ScalaToolsSnapshots</id>
+            <name>Scala Tools Snapshots</name>
+            <url>http://scala-tools.org/repo-snapshots/</url>
+        </repository>
+        <repository>
+            <id>EaioUUIDlibraryRepository</id>
+            <name>Eaio UUID library Repository</name>
+            <url>http://eaio.com/maven2/</url>
+        </repository>
+        <repository>
+            <id>SunRepository</id>
+            <name>Sun Repository</name>
+            <url>http://download.java.net/maven/2/</url>
+        </repository>
+        <repository>
+            <id>ClouderaRepository</id>
+            <name>Cloudera Repository</name>
+            <url>https://repository.cloudera.com/content/groups/cloudera-repos/</url>
+        </repository>
+        <repository>
+            <id>TinkerPopRepository</id>
+            <name>TinkerPop Repository</name>
+            <url>http://tinkerpop.com/maven2/</url>
+        </repository>
+        <repository>
+            <id>ScalaToolsReleases</id>
+            <name>Scala Tools Releases</name>
+            <url>http://scala-tools.org/repo-releases/</url>
         </repository>
         <repository>
             <id>ScalaToolsMaven2Repository</id>
