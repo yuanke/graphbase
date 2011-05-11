@@ -17,8 +17,19 @@
 
 import java.io.File
 import sbt._
+import xml.transform.{RuleTransformer, RewriteRule}
+import xml.{Elem, Node}
 
 class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
+
+  //Dependencies versions
+  val hadoopVersion = "0.20.2-cdh3u0"
+  val hbaseVersion = "0.90.1-cdh3u0"
+  val zookeeperVersion = "3.3.3-cdh3u0"
+  val blueprintsVersion = "0.6"
+  val blueprintsTestVersion = "0.5"
+  val gremlinVersion = "0.9"
+
 
   def doNothing() = task {
     None
@@ -58,28 +69,28 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
   // Dependencies
   object Dependencies {
     // Compile
-    val blueprints = "com.tinkerpop.blueprints" % "blueprints-core" % "0.6" intransitive
-    val zookeeper = "org.apache.zookeeper" % "zookeeper" % "3.3.3-cdh3u0"
+    val blueprints = "com.tinkerpop.blueprints" % "blueprints-core" % blueprintsVersion intransitive
+    val zookeeper = "org.apache.zookeeper" % "zookeeper" % zookeeperVersion
     val eaio = "com.eaio.uuid" % "uuid" % "3.2"
     val commonsLang = "commons-lang" % "commons-lang" % "2.6"
 
     // Test
-    val hadoopTest = "org.apache.hadoop" % "hadoop-test" % "0.20.2-cdh3u0" % "test"
-    val hbaseTest = "org.apache.hbase" % "hbase" % "0.90.1-cdh3u0" % "test" classifier "tests"
+    val hadoopTest = "org.apache.hadoop" % "hadoop-test" % hadoopVersion % "test"
+    val hbaseTest = "org.apache.hbase" % "hbase" % hbaseVersion % "test" classifier "tests"
     val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
     val junit = "junit" % "junit" % "4.5" % "test"
-    val junitInterface = "com.novocode" % "junit-interface" % "0.6" % "test->default"
-    val blueprintsTest = "com.tinkerpop" % "blueprints-tests" % "0.5" % "test" intransitive
+    val junitInterface = "com.novocode" % "junit-interface" % blueprintsVersion % "test->default"
+    val blueprintsTest = "com.tinkerpop" % "blueprints-tests" % blueprintsTestVersion % "test" intransitive
 
     // Compile & Test
     val ivyXML =
       <dependencies>
-        <dependency org="com.tinkerpop" name="gremlin" rev="0.9" conf="test">
+        <dependency org="com.tinkerpop" name="gremlin" rev={gremlinVersion} conf="test">
             <exclude org="org.openrdf.sesame"/>
             <exclude org="net.fortytwo"/>
             <exclude module="blueprints-sail-graph"/>
         </dependency>
-        <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2-cdh3u0" conf="compile">
+        <dependency org="org.apache.hadoop" name="hadoop-core" rev={hadoopVersion} conf="compile">
             <exclude module="commons-cli"/>
             <exclude module="xmlenc"/>
             <exclude module="commons-httpclient"/>
@@ -104,7 +115,7 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
             <exclude module="jackson-core-asl"/>
             <exclude module="jackson-mapper-asl"/>
         </dependency>
-        <dependency org="org.apache.hbase" name="hbase" rev="0.90.1-cdh3u0" conf="compile">
+        <dependency org="org.apache.hbase" name="hbase" rev={hbaseVersion} conf="compile">
             <exclude module="avro"/>
             <exclude module="commons-lang"/>
             <exclude module="guava"/>
@@ -190,10 +201,254 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     // Compile
     override def ivyXML = Dependencies.ivyXML
 
-  }
+    object AddHadoopAndHbaseExclusions extends RewriteRule {
 
-  class MapReduceProject(info: ProjectInfo) extends GraphbaseProject(info) {
+      override def transform(n: Node): Seq[Node] = {
+        n match {
+          case Elem(prefix, "dependency", attribs, scope, children@_ *) => {
+            if (children(3) == <artifactId>hadoop-core</artifactId>)
+              <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-core</artifactId>
+                <version>{hadoopVersion}</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>commons-cli</groupId>
+                    <artifactId>commons-cli</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>xmlenc</groupId>
+                    <artifactId>xmlenc</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>commons-httpclient</groupId>
+                    <artifactId>commons-httpclient</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>commons-net</groupId>
+                    <artifactId>commons-net</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>tomcat</groupId>
+                    <artifactId>jasper-runtime</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>tomcat</groupId>
+                    <artifactId>jasper-compiler</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jsp-api-2.1</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jsp-2.1</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>commons-el</groupId>
+                    <artifactId>commons-el</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>net.java.dev.jets3t</groupId>
+                    <artifactId>jets3t</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>servlet-api-2.5</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>javax.servlet.jsp</groupId>
+                    <artifactId>jsp-api</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>net.sf.kosmosfs</groupId>
+                    <artifactId>kfs</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>oro</groupId>
+                    <artifactId>oro</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.eclipse.jdt</groupId>
+                    <artifactId>core</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-core-asl</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-mapper-asl</artifactId>
+                  </exclusion>
+                </exclusions>
+              </dependency>
+            else
+            if (children(3) ==
+              <artifactId>hbase</artifactId>
+            )
+              <dependency>
+                <groupId>org.apache.hbase</groupId>
+                <artifactId>hbase</artifactId>
+                <version>{hbaseVersion}</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>org.apache.avro</groupId>
+                    <artifactId>avro</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>avro</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.apache.zookeeper</groupId>
+                    <artifactId>zookeeper</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.apache.thrift</groupId>
+                    <artifactId>thrift</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.jruby</groupId>
+                    <artifactId>jruby-complete</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-core</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-json</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-server</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>jsr311-api</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>javax.xml.bind</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>stax</groupId>
+                    <artifactId>stax-api</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>commons-cli</groupId>
+                    <artifactId>commons-cli</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>commons-httpclient</groupId>
+                    <artifactId>commons-httpclient</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jsp-2.1</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jsp-api-2.1</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>servlet-api-2.5</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>tomcat</groupId>
+                    <artifactId>jasper-compiler</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>tomcat</groupId>
+                    <artifactId>jasper-runtime</artifactId>
+                  </exclusion>
+                </exclusions>
+              </dependency>
+            else
+            if (children(3) ==
+              <artifactId>zookeeper</artifactId>
+            )
+              <dependency>
+                <groupId>org.apache.zookeeper</groupId>
+                <artifactId>zookeeper</artifactId>
+                <version>{zookeeperVersion}</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>jline</groupId>
+                    <artifactId>jline</artifactId>
+                  </exclusion>
+                </exclusions>
+              </dependency>
+            else
+              n
+          }
+          case _ => n
+        }
+      }
+    }
 
+    val ruleTransformer = new RuleTransformer(AddHadoopAndHbaseExclusions)
+
+    override def pomPostProcess(pom: Node): Node = {
+      ruleTransformer(pom)
+    }
   }
 
   // Subprojects
