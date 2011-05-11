@@ -1,5 +1,6 @@
 .idea/
 graphbase.iml
+blueprints/graphbase-blueprints.iml
 lib_managed/
 out/
 project/boot/
