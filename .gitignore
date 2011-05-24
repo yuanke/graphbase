@@ -9,3 +9,7 @@ project/plugins/project/
 project/plugins/target/
 project/project.iml
 target/
+.DS_Store
+project/plugins/src_managed/
+tools/graph-generator/graphbase-graph-generator.iml
+tools/graphbase-tools.iml
