@@ -33,13 +33,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 class HBaseHelper {
 
-    private final HBaseAdmin admin;
-    final String ivnameClass;
-    private final String ivnameProperties;
-    final String vnameProperties;
-    final String vnameOutEdges;
-    final String vnameInEdges;
-    final String vnameEdgeProperties;
+    private HBaseAdmin admin;
+    private String name;
+    String ivnameClass;
+    private String ivnameProperties;
+    String vnameProperties;
+    String vnameOutEdges;
+    String vnameInEdges;
+    String vnameEdgeProperties;
 
     private static final String separator = ".-.";
     static final String vertexClass = "vertex";
@@ -50,6 +51,10 @@ class HBaseHelper {
 
     HBaseHelper(HBaseAdmin admin, String name) {
         this.admin = admin;
+        this.name = name;
+    }
+
+    void createTables() {
         String vname = name;
         String ivname = name + "_indexes";
         this.ivnameClass = ivname + "_class";
@@ -86,6 +91,28 @@ class HBaseHelper {
             throw new RuntimeException(e);
         }
     }
+
+    void deleteTables() {
+        String vname = name;
+        String ivname = name + "_indexes";
+        try {
+            if (!admin.tableExists(vname)) {
+                admin.disableTable(vname);
+                admin.deleteTable(vname);
+            }
+            if (!admin.tableExists(ivname)) {
+                admin.disableTable(ivname);
+                admin.deleteTable(ivname);
+            }
+        } catch (MasterNotRunningException e) {
+            throw new RuntimeException(e);
+        } catch (ZooKeeperConnectionException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     String getIndexTableName(String name, String key) {
         return "index" + separator + name + separator + key;

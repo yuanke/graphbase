@@ -31,11 +31,7 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
   describe("A graph") {
 
     it("should create and remove automatic indexes") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: IndexableGraph = new HBaseGraph(admin, "simple")
+      val graph: IndexableGraph = new HBaseGraph("localhost", port, "simple")
 
       val i1 = graph.createAutomaticIndex("idx1", classOf[Vertex], Set("FirstName", "FamilyName"))
       val indexes1 = graph.getIndices
@@ -50,11 +46,7 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
     }
 
     it("should index vertex properties") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: IndexableGraph = new HBaseGraph(admin, "simple")
+      val graph: IndexableGraph = new HBaseGraph("localhost", port, "simple")
 
       val i1 = graph.createAutomaticIndex("idx1", classOf[Vertex], Set("FirstName", "FamilyName"))
       val i1n = graph.getIndex("idx1", classOf[Vertex])
@@ -71,11 +63,7 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
     }
 
     it("should index edge properties") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: IndexableGraph = new HBaseGraph(admin, "simple")
+      val graph: IndexableGraph = new HBaseGraph("localhost", port, "simple")
 
       val i1 = graph.createAutomaticIndex("idx2", classOf[Edge], Set("Prop1", "Prop2"))
       val i1n = graph.getIndex("idx2", classOf[Edge])
@@ -94,11 +82,7 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
     }
 
     it("shouldn't allow an index defined for edges to index vertices") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: IndexableGraph = new HBaseGraph(admin, "simple")
+      val graph: IndexableGraph = new HBaseGraph("localhost", port, "simple")
 
       val iv = graph.createAutomaticIndex("idx3", classOf[Edge], Set("Prop1"))
 
@@ -109,11 +93,7 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
     }
 
     it("shouldn't allow an index defined for vertices to index edges") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: IndexableGraph = new HBaseGraph(admin, "simple")
+      val graph: IndexableGraph = new HBaseGraph("localhost", port, "simple")
 
       val ie = graph.createAutomaticIndex("idx4", classOf[Vertex], Set("Prop1"))
 

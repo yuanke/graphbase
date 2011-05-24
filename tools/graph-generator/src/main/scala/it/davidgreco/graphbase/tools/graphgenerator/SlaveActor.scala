@@ -14,10 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package it.davidgreco.graphbase.tools.graphgenerator
 
-import sbt._
+import com.tinkerpop.blueprints.pgm.IndexableGraph
+import akka.actor.{PoisonPill, Actor}
+import akka.actor.Actor._
+import it.davidgreco.graphbase.blueprints.HBaseGraph
+class SlaveActor extends Actor {
 
-class Plugins(info: ProjectInfo) extends PluginDefinition(info) {
-  val akkaRepo   = "Akka Repo" at "http://akka.io/repository"
-  val akkaPlugin = "se.scalablesolutions.akka" % "akka-sbt-plugin" % "1.1"
+  var graph: IndexableGraph = _
+
+  protected def receive = {
+    case ConnectSlaves(quorum, port, name) => {
+      graph = new HBaseGraph(quorum, port, name)
+      self.reply("OK")
+    }
+    case GenerateRange(x, y) => {
+      for (i <- x to y) {
+        val v = graph.addVertex(null)
+        v.setProperty("id", i)
+        if (i % 100 == 0)
+          println(this + " " + i)
+      }
+      println("done.")
+    }
+  }
 }

@@ -38,11 +38,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
   describe("A graph") {
 
     it("should create and retrieve vertexes") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val graph: Graph = new HBaseGraph("localhost", port, "simple")
 
       val v1 = graph.addVertex(null)
 
@@ -52,11 +48,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should add and retrieve vertex properties") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val graph: Graph = new HBaseGraph("localhost", port, "simple")
       val v1 = graph.addVertex(null)
 
       v1.setProperty("A_STRING", "DAVID")
@@ -78,11 +70,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should remove vertexes") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val graph: Graph = new HBaseGraph("localhost", port, "simple")
       val v1 = graph.addVertex(null)
 
       graph.removeVertex(v1)
@@ -91,11 +79,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should remove vertex properties") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val graph: Graph = new HBaseGraph("localhost", port, "simple")
       val v1 = graph.addVertex(null)
 
       v1.setProperty("A_STRING", "DAVID")
@@ -104,11 +88,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should complain on non supported property type") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val graph: Graph = new HBaseGraph("localhost", port, "simple")
 
       val v1 = graph.addVertex(null);
 
@@ -118,11 +98,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should create and retrieve edges") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val graph: Graph = new HBaseGraph("localhost", port, "simple")
 
       val v1 = graph.addVertex(null)
       val v2 = graph.addVertex(null)
@@ -193,11 +169,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should create and retrieve edge properties") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val graph: Graph = new HBaseGraph("localhost", port, "simple")
 
       val v1 = graph.addVertex(null)
       val v2 = graph.addVertex(null)
@@ -241,11 +213,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should remove edge properties") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val graph: Graph = new HBaseGraph("localhost", port, "simple")
       val v1 = graph.addVertex(null)
       val v2 = graph.addVertex(null)
       val e1 = graph.addEdge(null, v1, v2, "LABEL")
@@ -256,11 +224,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should remove edges") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val graph: Graph = new HBaseGraph("localhost", port, "simple")
 
       val v1 = graph.addVertex(null)
       val v2 = graph.addVertex(null)
@@ -322,11 +286,7 @@ class GraphbaseTestSuite extends Spec with ShouldMatchers with BeforeAndAfterEac
     }
 
     it("should allow the usage of gremlin") {
-      val conf = HBaseConfiguration.create
-      conf.set("hbase.zookeeper.quorum", "localhost")
-      conf.set("hbase.zookeeper.property.clientPort", port)
-      val admin = new HBaseAdmin(conf)
-      val graph: Graph = new HBaseGraph(admin, "simple")
+      val graph: Graph = new HBaseGraph("localhost", port, "simple")
 
       val v1 = graph.addVertex(null)
       v1.setProperty("name", "v1")

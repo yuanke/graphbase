@@ -17,6 +17,10 @@
 package it.davidgreco.graphbase.blueprints;
 
 import com.tinkerpop.blueprints.pgm.*;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.MasterNotRunningException;
+import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -29,8 +33,21 @@ public class HBaseGraph implements Graph, IndexableGraph {
     final HBaseHelper handle;
     final Map<String, Index> indices;
 
-    public HBaseGraph(HBaseAdmin admin, String name) {
+    public HBaseGraph(String quorum, String port, String name) {
+
+        Configuration conf = HBaseConfiguration.create();
+        conf.set("hbase.zookeeper.quorum", quorum);
+        conf.set("hbase.zookeeper.property.clientPort", port);
+        HBaseAdmin admin = null;
+        try {
+            admin = new HBaseAdmin(conf);
+        } catch (MasterNotRunningException e) {
+            throw new RuntimeException(e);
+        } catch (ZooKeeperConnectionException e) {
+            throw new RuntimeException(e);
+        }
         this.handle = new HBaseHelper(admin, name);
+        this.handle.createTables();
         this.indices = new HashMap<String, Index>();
         Iterable<Index<? extends Element>> iterable = this.getIndices();
         for (Index<? extends Element> index : iterable) {
@@ -229,28 +246,12 @@ public class HBaseGraph implements Graph, IndexableGraph {
 
     @Override
     public void clear() {
-        ResultScanner vscanner = null;
-        try {
-            Scan vscan = new Scan();
-            vscanner = handle.vtable.getScanner(vscan);
-            for (Result res : vscanner) {
-                byte[] id = res.getRow();
-                HBaseVertex vertex = new HBaseVertex();
-                vertex.setGraph(this);
-                vertex.setId(id);
-                this.removeVertex(vertex);
-            }
-            Iterable<Index<? extends Element>> indices = getIndices();
-            for (Index i : indices) {
-                dropIndex(i.getIndexName());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (vscanner != null) {
-                vscanner.close();
-            }
+        Iterable<Index<? extends Element>> indices = getIndices();
+        for (Index i : indices) {
+            dropIndex(i.getIndexName());
         }
+        handle.deleteTables();
+        handle.createTables();
     }
 
     @Override

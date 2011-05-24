@@ -23,18 +23,7 @@ public class BlueprintsGraphbaseTestSuite extends GraphTest {
     @BeforeClass
     public void setUp() throws Exception {
         testUtil.startMiniCluster();
-        Configuration conf = HBaseConfiguration.create();
-        conf.set("hbase.zookeeper.quorum", "localhost");
-        conf.set("hbase.zookeeper.property.clientPort", "21818");
-        HBaseAdmin admin = null;
-        try {
-            admin = new HBaseAdmin(conf);
-        } catch (MasterNotRunningException e) {
-            e.printStackTrace();
-        } catch (ZooKeeperConnectionException e) {
-            e.printStackTrace();
-        }
-        graph = (IndexableGraph) new HBaseGraph(admin, "simple");
+        graph = (IndexableGraph) new HBaseGraph("localhost", "21818", "simple");
     }
 
     @AfterClass

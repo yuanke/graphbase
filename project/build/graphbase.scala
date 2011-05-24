@@ -26,9 +26,12 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
   val hadoopVersion = "0.20.2-cdh3u0"
   val hbaseVersion = "0.90.1-cdh3u0"
   val zookeeperVersion = "3.3.3-cdh3u0"
-  val blueprintsVersion = "0.6"
+  val blueprintsVersion = "0.7"
   val blueprintsTestVersion = "0.5"
   val gremlinVersion = "0.9"
+  val scalatestVersion = "1.6-SNAPSHOT"
+  val junitVersion = "4.8.2"
+  val junitInterfaceVersion = "0.6"
 
 
   def doNothing() = task {
@@ -77,9 +80,9 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     // Test
     val hadoopTest = "org.apache.hadoop" % "hadoop-test" % hadoopVersion % "test"
     val hbaseTest = "org.apache.hbase" % "hbase" % hbaseVersion % "test" classifier "tests"
-    val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
-    val junit = "junit" % "junit" % "4.5" % "test"
-    val junitInterface = "com.novocode" % "junit-interface" % blueprintsVersion % "test->default"
+    val scalatest = "org.scalatest" %% "scalatest" % scalatestVersion % "test"
+    val junit = "junit" % "junit" % junitVersion % "test"
+    val junitInterface = "com.novocode" % "junit-interface" % junitInterfaceVersion % "test->default"
     val blueprintsTest = "com.tinkerpop" % "blueprints-tests" % blueprintsTestVersion % "test" intransitive
 
     // Compile & Test
@@ -210,7 +213,9 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
               <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-core</artifactId>
-                <version>{hadoopVersion}</version>
+                <version>
+                  {hadoopVersion}
+                </version>
                 <exclusions>
                   <exclusion>
                     <groupId>commons-cli</groupId>
@@ -309,7 +314,9 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
               <dependency>
                 <groupId>org.apache.hbase</groupId>
                 <artifactId>hbase</artifactId>
-                <version>{hbaseVersion}</version>
+                <version>
+                  {hbaseVersion}
+                </version>
                 <exclusions>
                   <exclusion>
                     <groupId>org.apache.avro</groupId>
@@ -428,7 +435,9 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
               <dependency>
                 <groupId>org.apache.zookeeper</groupId>
                 <artifactId>zookeeper</artifactId>
-                <version>{zookeeperVersion}</version>
+                <version>
+                  {zookeeperVersion}
+                </version>
                 <exclusions>
                   <exclusion>
                     <groupId>jline</groupId>
@@ -451,7 +460,19 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     }
   }
 
+  class GraphGeneratorProject(info: ProjectInfo) extends GraphbaseProject(info) with AkkaProject {
+    val akkaRemote = akkaModule("remote")
+  }
+
+  class ToolsParentProject(info: ProjectInfo) extends ParentProject(info) {
+    override def disableCrossPaths = true
+
+    lazy val graphGenerator = project("graph-generator", "graphbase-graph-generator", new GraphGeneratorProject(_), blueprints)
+  }
+
   // Subprojects
   lazy val blueprints = project("blueprints", "graphbase-blueprints", new BlueprintsProject(_))
+  lazy val tools = project("tools", "graphbase-tools", new ToolsParentProject(_))
+
 
 }
