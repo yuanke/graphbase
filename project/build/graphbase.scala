@@ -465,7 +465,18 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
   }
 
   class ToolsParentProject(info: ProjectInfo) extends ParentProject(info) {
-    override def disableCrossPaths = true
+
+    def doNothing() = task {
+      None
+    }
+
+    override def publishLocalAction = doNothing
+
+    override def deliverLocalAction = doNothing
+
+    override def publishAction = doNothing
+
+    override def deliverAction = doNothing
 
     lazy val graphGenerator = project("graph-generator", "graphbase-graph-generator", new GraphGeneratorProject(_), blueprints)
   }
@@ -473,6 +484,5 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
   // Subprojects
   lazy val blueprints = project("blueprints", "graphbase-blueprints", new BlueprintsProject(_))
   lazy val tools = project("tools", "graphbase-tools", new ToolsParentProject(_))
-
 
 }
