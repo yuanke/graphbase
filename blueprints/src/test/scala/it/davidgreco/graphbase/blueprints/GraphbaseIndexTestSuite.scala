@@ -19,8 +19,6 @@ package it.davidgreco.graphbase.blueprints
 import scala.collection.JavaConversions._
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{BeforeAndAfterEach, Spec}
-import org.apache.hadoop.hbase.client.HBaseAdmin
-import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.util.Bytes
 import com.tinkerpop.blueprints.pgm.{Edge, Vertex, IndexableGraph}
 
@@ -57,9 +55,10 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
 
       val v1n1 = i1n.get("FirstName", "David")
       val v1n2 = i1n.get("FamilyName", "Greco")
-      assert(v1n1.size == 1)
-      assert(v1n2.size == 1)
-      assert(toString(v1n1.toBuffer.apply(0).getId) == toString(v1n2.toBuffer.apply(0).getId))
+
+      assert((for (v <- v1n1.iterator()) yield v).length == 1)
+      assert((for (v <- v1n2.iterator()) yield v).length == 1)
+      assert(toString(v1n1.next().getId) == toString(v1n2.next().getId))
     }
 
     it("should index edge properties") {
@@ -76,9 +75,9 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
 
       val e1n1 = i1n.get("Prop1", "Val1")
       val e1n2 = i1n.get("Prop2", "Val2")
-      assert(e1n1.size == 1)
-      assert(e1n2.size == 1)
-      assert(toString(e1n1.toBuffer.apply(0).getId) == toString(e1n2.toBuffer.apply(0).getId))
+      assert((for (v <- e1n1.iterator()) yield v).length == 1)
+      assert((for (v <- e1n2.iterator()) yield v).length == 1)
+      assert(toString(e1n1.next().getId) == toString(e1n2.next().getId))
     }
 
     it("shouldn't allow an index defined for edges to index vertices") {
@@ -89,7 +88,7 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
       val v1 = graph.addVertex(null)
       v1.setProperty("Prop1", "Val1")
       val v1a = iv.get("Prop1", "Val1")
-      assert(v1a.size == 0)
+      assert((for (v <- v1a.iterator()) yield v).length == 0)
     }
 
     it("shouldn't allow an index defined for vertices to index edges") {
@@ -102,7 +101,7 @@ class GraphbaseIndexTestSuite extends Spec with ShouldMatchers with BeforeAndAft
       val e1 = graph.addEdge(null, v1, v2, "")
       e1.setProperty("Prop1", "Val1")
       val e1a = ie.get("Prop1", "Val1")
-      assert(e1a.size == 0)
+      assert((for (v <- e1a.iterator()) yield v).length == 0)
     }
 
   }

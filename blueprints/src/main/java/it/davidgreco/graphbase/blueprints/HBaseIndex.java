@@ -16,10 +16,7 @@
  */
 package it.davidgreco.graphbase.blueprints;
 
-import com.tinkerpop.blueprints.pgm.AutomaticIndex;
-import com.tinkerpop.blueprints.pgm.Element;
-import com.tinkerpop.blueprints.pgm.Index;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.pgm.*;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -27,12 +24,42 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
+
+    public static class HBaseIndexCloseableSequence<T> implements CloseableSequence<T> {
+
+        private final List<T> list;
+
+        public HBaseIndexCloseableSequence(List<T> list) {
+            this.list = list;
+        }
+
+        @Override
+        public void close() {
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return list.iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return list.iterator().hasNext();
+        }
+
+        @Override
+        public T next() {
+            return list.iterator().next();
+        }
+
+        @Override
+        public void remove() {
+
+        }
+    }
 
     private final HBaseGraph graph;
     private final String name;
@@ -80,12 +107,12 @@ class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Iterable<T> get(String key, Object value) {
+    public CloseableSequence<T> get(String key, Object value) {
         try {
             HBaseHelper.IndexTableStruct struct = indexTables.get(key);
             List<T> elements = new ArrayList<T>();
             if (struct == null) {
-                return elements;
+                return new HBaseIndexCloseableSequence<T>(elements);
             }
             Get get = new Get(Util.typedObjectToBytes(value));
             Result result = struct.indexTable.get(get);
@@ -99,7 +126,7 @@ class HBaseIndex<T extends Element> implements AutomaticIndex<T> {
                     }
                 }
             }
-            return elements;
+            return new HBaseIndexCloseableSequence<T>(elements);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -26,10 +26,10 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
   val hadoopVersion = "0.20.2-cdh3u0"
   val hbaseVersion = "0.90.1-cdh3u0"
   val zookeeperVersion = "3.3.3-cdh3u0"
-  val blueprintsVersion = "0.7"
+  val blueprintsVersion = "0.8"
   val blueprintsTestVersion = "0.5"
-  val gremlinVersion = "0.9"
-  val scalatestVersion = "1.6-SNAPSHOT"
+  val gremlinVersion = "1.1"
+  val scalatestVersion = "1.6.1"
   val junitVersion = "4.8.2"
   val junitInterfaceVersion = "0.6"
 
@@ -84,15 +84,11 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     val junit = "junit" % "junit" % junitVersion % "test"
     val junitInterface = "com.novocode" % "junit-interface" % junitInterfaceVersion % "test->default"
     val blueprintsTest = "com.tinkerpop" % "blueprints-tests" % blueprintsTestVersion % "test" intransitive
+    val gremlin = "com.tinkerpop" % "gremlin" % gremlinVersion % "test"
 
     // Compile & Test
     val ivyXML =
       <dependencies>
-        <dependency org="com.tinkerpop" name="gremlin" rev={gremlinVersion} conf="test">
-            <exclude org="org.openrdf.sesame"/>
-            <exclude org="net.fortytwo"/>
-            <exclude module="blueprints-sail-graph"/>
-        </dependency>
         <dependency org="org.apache.hadoop" name="hadoop-core" rev={hadoopVersion} conf="compile">
             <exclude module="commons-cli"/>
             <exclude module="xmlenc"/>
@@ -200,6 +196,7 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     lazy val junit = Dependencies.junit
     lazy val junitInterface = Dependencies.junitInterface
     lazy val blueprintsTest = Dependencies.blueprintsTest
+    lazy val gremlin = Dependencies.gremlin
 
     // Compile
     override def ivyXML = Dependencies.ivyXML
@@ -460,29 +457,7 @@ class GraphBaseParentProject(info: ProjectInfo) extends ParentProject(info) {
     }
   }
 
-  class GraphGeneratorProject(info: ProjectInfo) extends GraphbaseProject(info) with AkkaProject {
-    val akkaRemote = akkaModule("remote")
-  }
-
-  class ToolsParentProject(info: ProjectInfo) extends ParentProject(info) {
-
-    def doNothing() = task {
-      None
-    }
-
-    override def publishLocalAction = doNothing
-
-    override def deliverLocalAction = doNothing
-
-    override def publishAction = doNothing
-
-    override def deliverAction = doNothing
-
-    lazy val graphGenerator = project("graph-generator", "graphbase-graph-generator", new GraphGeneratorProject(_), blueprints)
-  }
-
   // Subprojects
   lazy val blueprints = project("blueprints", "graphbase-blueprints", new BlueprintsProject(_))
-  lazy val tools = project("tools", "graphbase-tools", new ToolsParentProject(_))
 
 }
